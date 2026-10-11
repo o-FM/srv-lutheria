@@ -1,14 +1,17 @@
 package com.luthier.configs;
 
 import com.luthier.domain.filters.LoginRateLimitFilter;
+import com.luthier.domain.records.AppProperties;
 import java.time.Duration;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
@@ -30,9 +33,14 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter conv,
-      CorsConfigurationSource corsSource, LoginRateLimitFilter rateLimitFilter) throws Exception {
-    return http.requiresChannel(ch -> ch.anyRequest().requiresSecure())
-        .cors(cors -> cors.configurationSource(corsSource))
+      Environment env, LoginRateLimitFilter rateLimitFilter) throws Exception {
+
+    if (!env.matchesProfiles("dev")) {
+      http.redirectToHttps(Customizer.withDefaults());
+    }
+
+    return http
+        .cors(Customizer.withDefaults())
         .csrf(csrf -> csrf.disable())
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -62,10 +70,9 @@ public class SecurityConfig {
   }
 
   @Bean
-  CorsConfigurationSource corsConfigurationSource(
-      @Value("${app.cors.allowed-origins}") List<String> origins) {
+  CorsConfigurationSource corsConfigurationSource(AppProperties props) {
     var config = new CorsConfiguration();
-    config.setAllowedOrigins(origins);
+    config.setAllowedOrigins(props.cors().allowedOrigins());
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
     config.setExposedHeaders(List.of("Retry-After"));
@@ -78,10 +85,9 @@ public class SecurityConfig {
   }
 
   @Bean
-  LoginRateLimitFilter loginRateLimitFilter(
-      @Value("${app.rate-limit.login.capacity}") int capacity,
-      @Value("${app.rate-limit.login.refill-minutes}") int refillMinutes) {
-    return new LoginRateLimitFilter(capacity, Duration.ofMinutes(refillMinutes));
+  LoginRateLimitFilter loginRateLimitFilter(AppProperties props) {
+    var login = props.rateLimit().login();
+    return new LoginRateLimitFilter(login.capacity(), Duration.ofMinutes(login.refillMinutes()));
   }
 
   @Bean
