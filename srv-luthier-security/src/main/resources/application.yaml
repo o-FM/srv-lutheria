@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+        jdbc:
+          time_zone: America/Sao_Paulo
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
+
+luthieria:
+  admin:
+    email: admin@luthieria.com.br
+    senha: ${ADMIN_SENHA:admin123}
+  jwt:
+    secret: ${JWT_SECRET:dev-only-secret-troque-em-producao-min-32-bytes!!}
+    expiracao-minutos: 15
