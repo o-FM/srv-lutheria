@@ -10,29 +10,9 @@
   </parent>
 
   <artifactId>srv-luthier-parent</artifactId>
+  <packaging>pom</packaging>
 
   <dependencies>
-    <!-- módulos de negócio -->
-    <dependency>
-      <groupId>com.luthier</groupId>
-      <artifactId>srv-luthier-security</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.luthier</groupId>
-      <artifactId>srv-luthier-customer</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.luthier</groupId>
-      <artifactId>srv-luthier-product</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.luthier</groupId>
-      <artifactId>srv-luthier-service</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.luthier</groupId>
-      <artifactId>srv-luthier-notification</artifactId>
-    </dependency>
 
     <!-- infraestrutura (versões vêm dos BOMs) -->
     <dependency>
@@ -67,6 +47,15 @@
       <artifactId>spring-boot-h2console</artifactId>
       <version>4.1.1</version>
       <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
     <dependency>

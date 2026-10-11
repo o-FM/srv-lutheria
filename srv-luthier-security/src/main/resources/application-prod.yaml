@@ -1,0 +1,5 @@
+app:
+  security:
+    cors:
+      allowed-origins:
+        - https://app.luthieria.com.br

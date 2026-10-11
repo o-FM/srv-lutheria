@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -20,6 +21,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 public class LoginRateLimitFilter extends OncePerRequestFilter {
 
+  private static final Set<String> PATHS = Set.of("/auth/login", "/auth/refresh");
+
   private final int capacity;
   private final Duration refillPeriod;
 
@@ -28,26 +31,28 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
       .maximumSize(100_000)
       .build();
 
-  public LoginRateLimitFilter(int capacity, Duration refillMinutes) {
+  public LoginRateLimitFilter(int capacity, Duration refillPeriod) {
     this.capacity = capacity;
-    this.refillPeriod = refillMinutes;
+    this.refillPeriod = refillPeriod;
   }
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
     return !(HttpMethod.POST.matches(request.getMethod())
-        && "/auth/login".equals(request.getRequestURI()));
+        && PATHS.contains(request.getRequestURI()));
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-      FilterChain filterChain) throws ServletException, IOException {
+  protected void doFilterInternal(HttpServletRequest request,
+      HttpServletResponse response,
+      FilterChain chain) throws ServletException, IOException {
 
-    Bucket bucket = buckets.get(request.getRemoteAddr(), k -> newBucket());
-    ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+    // Com server.forward-headers-strategy=native, getRemoteAddr() traz o IP real do cliente
+    String key = request.getRequestURI() + "|" + request.getRemoteAddr();
+    ConsumptionProbe probe = buckets.get(key, k -> newBucket()).tryConsumeAndReturnRemaining(1);
 
     if (probe.isConsumed()) {
-      filterChain.doFilter(request, response);
+      chain.doFilter(request, response);
       return;
     }
 
@@ -55,10 +60,11 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
     response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
     response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfter));
     response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+    response.setCharacterEncoding("UTF-8");
     response.getWriter().write("""
-            {"type":"about:blank","title":"Too Many Requests","status":429,\
-            "detail":"Muitas tentativas de login. Tente novamente em %d segundos."}
-            """.formatted(retryAfter));
+                {"type":"about:blank","title":"Too Many Requests","status":429,\
+                "detail":"Muitas tentativas. Tente novamente em %d segundos."}\
+                """.formatted(retryAfter));
   }
 
   private Bucket newBucket() {

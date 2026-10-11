@@ -1,13 +1,9 @@
 package com.luthier.configs;
 
 import com.luthier.domain.filters.LoginRateLimitFilter;
-import com.luthier.domain.records.AppProperties;
 import java.time.Duration;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -23,9 +19,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @EnableWebSecurity
 @Configuration(proxyBeanMethods = false)
@@ -33,9 +26,13 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter conv,
-      Environment env, LoginRateLimitFilter rateLimitFilter) throws Exception {
+      SegurancaProperties props) throws Exception {
 
-    if (!env.matchesProfiles("dev")) {
+    var login = props.rateLimit().login();
+    var rateLimitFilter = new LoginRateLimitFilter(login.capacity(),
+        Duration.ofMinutes(login.refillMinutes()));
+
+    if (props.requireHttps()) {
       http.redirectToHttps(Customizer.withDefaults());
     }
 
@@ -67,27 +64,6 @@ public class SecurityConfig {
         )
         .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
-  }
-
-  @Bean
-  CorsConfigurationSource corsConfigurationSource(AppProperties props) {
-    var config = new CorsConfiguration();
-    config.setAllowedOrigins(props.cors().allowedOrigins());
-    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-    config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-    config.setExposedHeaders(List.of("Retry-After"));
-    config.setAllowCredentials(true);
-
-    final var source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", config);
-
-    return source;
-  }
-
-  @Bean
-  LoginRateLimitFilter loginRateLimitFilter(AppProperties props) {
-    var login = props.rateLimit().login();
-    return new LoginRateLimitFilter(login.capacity(), Duration.ofMinutes(login.refillMinutes()));
   }
 
   @Bean

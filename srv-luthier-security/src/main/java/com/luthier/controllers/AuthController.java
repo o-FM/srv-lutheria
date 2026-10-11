@@ -1,13 +1,12 @@
 package com.luthier.controllers;
 
 import com.luthier.domain.records.LoginRequest;
-import com.luthier.domain.records.LoginResponse;
+import com.luthier.domain.records.TokenResponse;
 import com.luthier.services.TokenService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +27,7 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+  public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
 
     var authentication = authenticationManager.authenticate(
         UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.email(), loginRequest.password())
@@ -36,6 +35,6 @@ public class AuthController {
 
     var token = tokenService.generate(authentication);
 
-    return ResponseEntity.ok(new LoginResponse(token, "Bearer", tokenService.expirationInSeconds()));
+    return ResponseEntity.ok(new TokenResponse(token, null, "Bearer", tokenService.expirationInSeconds()));
   }
 }

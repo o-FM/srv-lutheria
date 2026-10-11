@@ -1,22 +1,16 @@
 server:
-  # Atrás de proxy/load balancer (Nginx, ALB, Ingress), sem isso o requiresSecure()
-  # entra em loop de redirect e o getRemoteAddr() devolve o IP do proxy
+  # Atrás de proxy/load balancer: necessário para o redirect HTTPS e para o IP real no rate limit.
+  # O proxy deve sobrescrever X-Forwarded-For/Proto (o cliente não pode forjá-los).
   forward-headers-strategy: native
-  servlet:
-    session:
-      cookie:
-        secure: true
-        http-only: true
-        same-site: strict
 
 app:
-  cors:
-    allowed-origins:
-      - https://app.seudominio.com.br
-  rate-limit:
-    login:
-      capacity: 5
-      refill-minutes: 1
+  security:
+    require-https: true          # padrão seguro; só o profile dev desliga
+    rate-limit:
+      login:
+        capacity: 5
+        refill-minutes: 1
+    # cors.allowed-origins é obrigatório e definido por profile (dev/prod).1
 
 spring:
   profiles:
