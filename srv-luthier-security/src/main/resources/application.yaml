@@ -1,3 +1,23 @@
+server:
+  # Atrás de proxy/load balancer (Nginx, ALB, Ingress), sem isso o requiresSecure()
+  # entra em loop de redirect e o getRemoteAddr() devolve o IP do proxy
+  forward-headers-strategy: native
+  servlet:
+    session:
+      cookie:
+        secure: true
+        http-only: true
+        same-site: strict
+
+app:
+  cors:
+    allowed-origins:
+      - https://app.seudominio.com.br
+  rate-limit:
+    login:
+      capacity: 5
+      refill-minutes: 1
+
 spring:
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
