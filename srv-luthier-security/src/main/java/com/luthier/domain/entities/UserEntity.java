@@ -40,7 +40,10 @@ public class UserEntity {
   public Profile getProfile() { return profile; }
   public boolean isActive() { return active; }
 
-  // TODO: RETIRAR APOS OS TESTES
+  public void changeProfile(Profile profile) { this.profile = profile; }
+  public void activate() { this.active = true; }
+  public void deactivate() { this.active = false; }
+
   public static UserEntity newUser(String email, String password, Profile profile) {
     var u = new UserEntity();
     u.email = email;

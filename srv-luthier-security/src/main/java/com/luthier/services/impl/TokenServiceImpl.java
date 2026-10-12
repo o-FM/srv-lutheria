@@ -50,6 +50,6 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   public long expirationInSeconds() {
-    return expirationInMinutes * 120;
+    return expirationInMinutes * 60;
   }
 }
