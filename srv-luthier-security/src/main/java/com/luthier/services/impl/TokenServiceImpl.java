@@ -1,11 +1,12 @@
 package com.luthier.services.impl;
 
+import com.luthier.domain.entities.UserEntity;
 import com.luthier.services.TokenService;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -16,31 +17,31 @@ import org.springframework.stereotype.Service;
 @Service
 public class TokenServiceImpl implements TokenService {
 
+  private static final String ISSUER = "luthieria";
+
   private final JwtEncoder jwtEncoder;
   private final long expirationInMinutes;
 
   public TokenServiceImpl(
       JwtEncoder jwtEncoder,
-      @Value("${luthieria.jwt.expiracao-minutos}")long expirationInMinutes) {
+      @Value("${luthieria.jwt.expiracao-minutos}") long expirationInMinutes) {
     this.jwtEncoder = jwtEncoder;
     this.expirationInMinutes = expirationInMinutes;
   }
 
   @Override
-  public String generate(Authentication auth) {
-    var instantNow = Instant.now();
-    var roles = auth.getAuthorities().stream()
-        .map(GrantedAuthority::getAuthority)
-        .filter(a -> a.startsWith("ROLE_"))
-        .map(r -> r.replace("ROLE_", ""))
-        .toList();
+  public String generate(UserEntity user) {
+    var now = Instant.now();
 
     var claims = JwtClaimsSet.builder()
-        .issuer("luthieria")
-        .subject(auth.getName())
-        .issuedAt(instantNow)
-        .expiresAt(instantNow.plus(expirationInMinutes, ChronoUnit.MINUTES))
-        .claim("roles", roles)
+        .issuer(ISSUER)
+        .subject(user.getEmail())
+        .id(UUID.randomUUID().toString())                       // jti
+        .issuedAt(now)
+        .expiresAt(now.plus(expirationInMinutes, ChronoUnit.MINUTES))
+        .claim("uid", user.getUuid().toString())
+        // lido pelo JwtAuthenticationConverter (JwtConfig) e vira ROLE_<valor>
+        .claim("roles", List.of(user.getProfile().getValue()))
         .build();
 
     var header = JwsHeader.with(MacAlgorithm.HS256).build();

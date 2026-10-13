@@ -5,3 +5,24 @@ app:
       allowed-origins:
         - http://localhost:5173
         - http://localhost:3000
+
+spring:
+  # MOVIDO do application.yaml: console do H2 só em dev
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# MOVIDO do application.yaml: o bind de parâmetros imprime e-mails, hashes de senha e hashes de
+# token no log. Útil para depurar, proibido em produção (LGPD).
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
+
+# Valores SOMENTE para desenvolvimento local. Nunca reutilize em outro ambiente.
+luthieria:
+  admin:
+    senha: ${ADMIN_SENHA:dev-admin-12345}
+  jwt:
+    secret: ${JWT_SECRET:dev-only-secret-troque-em-producao-min-32-bytes!!}

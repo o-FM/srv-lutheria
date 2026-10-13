@@ -14,7 +14,8 @@ import org.springframework.validation.annotation.Validated;
 public record SegurancaProperties(
     @DefaultValue("true") boolean requireHttps,
     @NotNull @Valid Cors cors,
-    @DefaultValue @Valid RateLimit rateLimit
+    @DefaultValue @Valid RateLimit rateLimit,
+    @DefaultValue @Valid Tokens tokens
 ) {
 
   public record Cors(@NotEmpty List<String> allowedOrigins) {}
@@ -24,4 +25,8 @@ public record SegurancaProperties(
   public record Login(
       @DefaultValue("5") @Positive int capacity,
       @DefaultValue("1") @Positive int refillMinutes) {}
+
+  public record Tokens(
+      @DefaultValue("30") @Positive int refreshDays,
+      @DefaultValue("30") @Positive int resetMinutes) {}
 }

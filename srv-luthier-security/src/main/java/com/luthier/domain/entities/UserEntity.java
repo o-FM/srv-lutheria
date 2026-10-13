@@ -44,6 +44,8 @@ public class UserEntity {
   public void activate() { this.active = true; }
   public void deactivate() { this.active = false; }
 
+  public void changePassword(String encodedPassword) { this.password = encodedPassword; }
+
   public static UserEntity newUser(String email, String password, Profile profile) {
     var u = new UserEntity();
     u.email = email;

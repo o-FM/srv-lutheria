@@ -17,10 +17,16 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 @Configuration
 public class JwtConfig {
 
+  public static final String HMAC_SHA_256 = "HmacSHA256";
+
   @Bean
   SecretKey jwtKey(@Value("${luthieria.jwt.secret}") String secret) {
-    System.out.println("JWT secret length = " + secret.getBytes(StandardCharsets.UTF_8).length);
-    return new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+    var bytes = secret.getBytes(StandardCharsets.UTF_8);
+    if (bytes.length < 32) {
+      throw new IllegalStateException("The secret must be at least 32 bytes long (HS256).");
+    }
+
+    return new SecretKeySpec(bytes, HMAC_SHA_256);
   }
 
   @Bean
