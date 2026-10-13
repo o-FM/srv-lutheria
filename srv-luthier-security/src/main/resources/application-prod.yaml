@@ -1,0 +1,7 @@
+app:
+  security:
+    cors:
+      allowed-origins:
+        - https://app.luthieria.com.br
+# Em produção JWT_SECRET e ADMIN_SENHA vêm do ambiente/cofre; sem eles a aplicação não sobe.
+# TODO: configurar datasource PostgreSQL (hoje o application.yaml aponta para H2 em memória).

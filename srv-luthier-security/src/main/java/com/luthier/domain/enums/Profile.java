@@ -1,10 +1,13 @@
 package com.luthier.domain.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.luthier.authorization.Roles;
+
 public enum Profile {
-  ADMIN("ADMIN"),
-  LUTHIER("LUTHIER"),
-  ATTENDANT("ATENDENTE"),
-  STOCK_CLERK("ESTOQUISTA");
+  ADMIN(Roles.ADMIN),
+  LUTHIER(Roles.LUTHIER),
+  ATTENDANT(Roles.ATTENDANT),
+  STOCK_CLERK(Roles.STOCK_CLERK);
 
   private final String value;
 
@@ -12,6 +15,8 @@ public enum Profile {
     this.value = value;
   }
 
+  /** Nome do papel (sem ROLE_). Também é o valor exposto na API, igual ao claim "roles" do JWT. */
+  @JsonValue
   public String getValue() {
     return value;
   }
