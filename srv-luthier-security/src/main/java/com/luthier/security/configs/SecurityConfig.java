@@ -1,6 +1,6 @@
 package com.luthier.security.configs;
 
-import com.luthier.security.domain.filters.LoginRateLimitFilter;
+import com.luthier.security.domain.filters.RateLimitFilter;
 import com.luthier.security.domain.filters.TenantContextFilter;
 import java.time.Duration;
 import org.springframework.context.annotation.Bean;
@@ -32,8 +32,11 @@ public class SecurityConfig {
       SegurancaProperties props) throws Exception {
 
     var login = props.rateLimit().login();
-    var rateLimitFilter = new LoginRateLimitFilter(login.capacity(),
+    var authRateLimit = RateLimitFilter.auth(login.capacity(),
         Duration.ofMinutes(login.refillMinutes()));
+    var portal = props.rateLimit().portal();
+    var portalRateLimit = RateLimitFilter.portal(portal.capacity(),
+        Duration.ofMinutes(portal.refillMinutes()));
 
     if (props.requireHttps()) {
       http.redirectToHttps(Customizer.withDefaults());
@@ -60,6 +63,8 @@ public class SecurityConfig {
         )
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
             .requestMatchers("/auth/**").permitAll()
+            // Portal do cliente: acesso pelo token aleatório da OS, sem login
+            .requestMatchers("/portal/**").permitAll()
             // Probes e métricas: em produção ficam na porta de management (rede interna)
             .requestMatchers("/actuator/health/**", "/actuator/info", "/actuator/prometheus")
             .permitAll()
@@ -68,7 +73,8 @@ public class SecurityConfig {
         .oauth2ResourceServer(oauth -> oauth
             .jwt(jwt -> jwt.jwtAuthenticationConverter(conv))
         )
-        .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(authRateLimit, UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(portalRateLimit, UsernamePasswordAuthenticationFilter.class)
         .addFilterAfter(new TenantContextFilter(), BearerTokenAuthenticationFilter.class)
         .build();
   }

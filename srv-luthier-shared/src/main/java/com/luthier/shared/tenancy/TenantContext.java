@@ -37,7 +37,11 @@ public final class TenantContext {
   /** Executa um trecho como o tenant informado e restaura o anterior (útil em listeners e jobs). */
   public static <T> T callAs(UUID tenantId, Supplier<T> action) {
     var previous = CURRENT.get();
-    CURRENT.set(tenantId);
+    if (tenantId == null) {
+      CURRENT.remove();
+    } else {
+      CURRENT.set(tenantId);
+    }
     try {
       return action.get();
     } finally {
@@ -47,6 +51,14 @@ public final class TenantContext {
         CURRENT.set(previous);
       }
     }
+  }
+
+  /**
+   * Executa SEM tenant (visão de plataforma, sem filtro do Hibernate). Uso restrito a consultas
+   * de roteamento como "de qual luthieria é este token?". Nunca para gravar dados de negócio.
+   */
+  public static <T> T callAsPlatform(Supplier<T> action) {
+    return callAs(null, action);
   }
 
   public static void runAs(UUID tenantId, Runnable action) {

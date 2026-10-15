@@ -20,6 +20,8 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, UUID> 
 
   boolean existsByCpf(String cpf);
 
+  long countByActiveTrue();
+
   boolean existsByCpfAndIdNot(String cpf, UUID id);
 
   Page<CustomerEntity> findAllByActiveTrue(Pageable pageable);

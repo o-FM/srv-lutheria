@@ -157,6 +157,12 @@ public class CustomerServiceImpl implements CustomerService, CustomerQueries {
             i.getBrand(), i.getModel()));
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public long countActive() {
+    return customerRepository.countByActiveTrue();
+  }
+
   // ---- helpers ----
 
   private CustomerEntity find(UUID id) {

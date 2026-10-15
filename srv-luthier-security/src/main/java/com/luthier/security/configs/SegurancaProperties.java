@@ -20,7 +20,11 @@ public record SegurancaProperties(
 
   public record Cors(@NotEmpty List<String> allowedOrigins) {}
 
-  public record RateLimit(@DefaultValue @Valid Login login) {}
+  public record RateLimit(@DefaultValue @Valid Login login, @DefaultValue @Valid Portal portal) {}
+
+  public record Portal(
+      @DefaultValue("30") @Positive int capacity,
+      @DefaultValue("1") @Positive int refillMinutes) {}
 
   public record Login(
       @DefaultValue("5") @Positive int capacity,

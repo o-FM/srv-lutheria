@@ -16,6 +16,8 @@ public interface CustomerQueries {
 
   Optional<InstrumentSummary> findInstrument(UUID instrumentId);
 
+  long countActive();
+
   record CustomerSummary(UUID id, String name, String phone, String email) {}
 
   record InstrumentSummary(UUID id, UUID customerId, String type, String brand, String model) {}
