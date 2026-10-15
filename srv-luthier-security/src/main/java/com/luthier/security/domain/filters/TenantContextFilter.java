@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.UUID;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,10 +42,15 @@ public class TenantContextFilter extends OncePerRequestFilter {
     }
 
     TenantContext.set(tenantId);
+    // Logs (inclusive JSON/ECS em produção) passam a trazer luthieria e usuário de cada linha
+    MDC.put("tenantId", tenantId.toString());
+    MDC.put("userId", jwtAuth.getToken().getClaimAsString("uid"));
     try {
       chain.doFilter(request, response);
     } finally {
       TenantContext.clear();
+      MDC.remove("tenantId");
+      MDC.remove("userId");
     }
   }
 

@@ -3,7 +3,7 @@ package com.luthier.security.services.impl;
 import com.luthier.security.domain.entities.TenantEntity;
 import com.luthier.security.domain.entities.UserEntity;
 import com.luthier.security.domain.enums.Profile;
-import com.luthier.security.domain.events.TenantRegistered;
+import com.luthier.security.TenantRegistered;
 import com.luthier.security.domain.records.RegisterTenantRequest;
 import com.luthier.security.domain.records.TokenResponse;
 import com.luthier.security.domain.repositories.TenantRepository;
@@ -65,7 +65,8 @@ public class TenantRegistrationServiceImpl implements TenantRegistrationService 
         Profile.ADMIN));
 
     events.publishEvent(
-        new TenantRegistered(tenant.getId(), tenant.getName(), user.getUuid(), user.getEmail()));
+        new TenantRegistered(tenant.getId(), tenant.getName(), user.getUuid(), user.getName(),
+            user.getEmail()));
 
     return authService.startSession(user);
   }

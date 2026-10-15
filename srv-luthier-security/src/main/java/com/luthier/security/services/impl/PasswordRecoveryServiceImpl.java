@@ -4,7 +4,7 @@ import com.luthier.security.configs.SegurancaProperties;
 import com.luthier.security.domain.entities.PasswordResetTokenEntity;
 import com.luthier.security.domain.entities.UserEntity;
 import com.luthier.security.domain.errors.InvalidTokenException;
-import com.luthier.security.domain.events.PasswordResetRequested;
+import com.luthier.security.PasswordResetRequested;
 import com.luthier.security.domain.records.ForgotPasswordRequest;
 import com.luthier.security.domain.records.ResetPasswordRequest;
 import com.luthier.security.domain.repositories.PasswordResetTokenRepository;
@@ -66,7 +66,8 @@ public class PasswordRecoveryServiceImpl implements PasswordRecoveryService {
     resetTokenRepository.save(
         PasswordResetTokenEntity.issue(user.getUuid(), OpaqueTokens.hash(raw), expiresAt));
 
-    events.publishEvent(new PasswordResetRequested(user.getUuid(), user.getEmail(), raw, expiresAt));
+    events.publishEvent(new PasswordResetRequested(user.getTenantId(), user.getUuid(), user.getName(),
+        user.getEmail(), raw, expiresAt));
   }
 
   @Override
