@@ -1,0 +1,47 @@
+# Ambiente local completo: PostgreSQL + aplicação (perfil prod) + Mailpit para ver os e-mails.
+#   mvn -B install -DskipTests && docker compose up --build
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: luthieria
+      POSTGRES_USER: luthieria
+      POSTGRES_PASSWORD: luthieria
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U luthieria"]
+      interval: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "8025:8025"   # UI web
+      - "1025:1025"   # SMTP
+
+  app:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/luthieria
+      DB_USERNAME: luthieria
+      DB_PASSWORD: luthieria
+      # Somente para uso local. Em produção vêm de um cofre de segredos.
+      JWT_SECRET: local-compose-secret-troque-em-producao-32b!
+      ADMIN_SENHA: local-admin-12345
+      APP_SECURITY_REQUIRE_HTTPS: "false"
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173
+      FRONTEND_URL: http://localhost:3000
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: 1025
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+
+volumes:
+  pgdata:

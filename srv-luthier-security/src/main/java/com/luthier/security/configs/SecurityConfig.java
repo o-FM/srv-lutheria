@@ -60,6 +60,9 @@ public class SecurityConfig {
         )
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
             .requestMatchers("/auth/**").permitAll()
+            // Probes e métricas: em produção ficam na porta de management (rede interna)
+            .requestMatchers("/actuator/health/**", "/actuator/info", "/actuator/prometheus")
+            .permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth -> oauth

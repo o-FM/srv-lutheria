@@ -1,36 +1,71 @@
+# Configuração BASE: padrões seguros, valem para todos os ambientes.
+# Relaxamentos de desenvolvimento ficam em application-dev.yaml (perfil padrão local).
+spring:
+  application:
+    name: srv-luthieria
+  profiles:
+    default: dev
+  threads:
+    virtual:
+      enabled: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      # O schema é responsabilidade do Flyway; o Hibernate só confere se bate com as entidades.
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    # Cada módulo traz suas migrations em db/migration/<modulo> dentro do próprio JAR.
+    locations: classpath:db/migration
+  modulith:
+    events:
+      # Eventos concluídos saem do outbox; os que falharam ficam para reprocessamento.
+      completion-mode: delete
+      republish-outstanding-events-on-restart: true
+
 app:
   security:
-    require-https: false
+    require-https: true
     cors:
-      allowed-origins:
-        - http://localhost:5173
-        - http://localhost:3000
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:https://app.luthieria.com.br}
 
-spring:
-  # Sem migrations por enquanto (decisão do time): o Hibernate gera o schema.
-  # Ao adotar Flyway, trocar para "validate" e habilitar o flyway.
-  flyway:
-    enabled: false
-  jpa:
-    hibernate:
-      ddl-auto: update
-  # MOVIDO do application.yaml: console do H2 só em dev
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-
-# MOVIDO do application.yaml: o bind de parâmetros imprime e-mails, hashes de senha e hashes de
-# token no log. Útil para depurar, proibido em produção (LGPD).
-logging:
-  level:
-    org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace
-
-# Valores SOMENTE para desenvolvimento local. Nunca reutilize em outro ambiente.
 luthieria:
-  admin:
-    senha: ${ADMIN_SENHA:dev-admin-12345}
   jwt:
     expiracao-minutos: 15
-    secret: ${JWT_SECRET:dev-only-secret-troque-em-producao-min-32-bytes!!}
+    secret: ${JWT_SECRET}
+  admin:
+    email: ${ADMIN_EMAIL:admin@luthieria.local}
+    senha: ${ADMIN_SENHA}
+  frontend-url: ${FRONTEND_URL:https://app.luthieria.com.br}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,modulith
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING:0.1}
+  observations:
+    key-values:
+      application: srv-luthieria
+  info:
+    env:
+      enabled: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+server:
+  forward-headers-strategy: native
+  error:
+    include-stacktrace: never
+    include-message: never

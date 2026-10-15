@@ -1,3 +1,4 @@
+# Desenvolvimento local. Valores SOMENTE para dev; nunca reutilize em outro ambiente.
 app:
   security:
     require-https: false
@@ -7,21 +8,35 @@ app:
         - http://localhost:3000
 
 spring:
-  # MOVIDO do application.yaml: console do H2 só em dev
+  datasource:
+    # H2 em modo PostgreSQL: as mesmas migrations rodam aqui e no Postgres de produção.
+    url: jdbc:h2:mem:luthieria;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password:
   h2:
     console:
       enabled: true
       path: /h2-console
 
-# MOVIDO do application.yaml: o bind de parâmetros imprime e-mails, hashes de senha e hashes de
-# token no log. Útil para depurar, proibido em produção (LGPD).
+springdoc:
+  api-docs:
+    enabled: true
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoint:
+    health:
+      show-details: always
+
+# O bind de parâmetros imprime e-mails e hashes no log: útil para depurar, proibido em produção (LGPD).
 logging:
   level:
     org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace
 
-# Valores SOMENTE para desenvolvimento local. Nunca reutilize em outro ambiente.
 luthieria:
+  frontend-url: http://localhost:3000
   admin:
     senha: ${ADMIN_SENHA:dev-admin-12345}
   jwt:

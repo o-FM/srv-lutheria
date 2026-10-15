@@ -1,7 +1,23 @@
-app:
-  security:
-    cors:
-      allowed-origins:
-        - https://app.luthieria.com.br
-# Em produção JWT_SECRET e ADMIN_SENHA vêm do ambiente/cofre; sem eles a aplicação não sobe.
-# TODO: configurar datasource PostgreSQL (hoje o application.yaml aponta para H2 em memória).
+# Produção: tudo sensível vem do ambiente/cofre. Sem JWT_SECRET, ADMIN_SENHA ou DB_* a
+# aplicação não sobe.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+  h2:
+    console:
+      enabled: false
+
+# Actuator em porta separada: não exponha a 8081 publicamente (só rede interna / Prometheus).
+management:
+  server:
+    port: ${MANAGEMENT_PORT:8081}
+
+# Logs estruturados em JSON (ECS) com traceId/spanId e tenantId no MDC.
+logging:
+  structured:
+    format:
+      console: ecs
