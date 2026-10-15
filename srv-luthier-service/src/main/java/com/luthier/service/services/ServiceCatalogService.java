@@ -1,6 +1,6 @@
 package com.luthier.service.services;
 
-import com.luthier.authorization.Access;
+import com.luthier.shared.authorization.Access;
 import com.luthier.service.domain.records.ServiceCatalogRequest;
 import com.luthier.service.domain.records.ServiceCatalogResponse;
 import java.util.List;

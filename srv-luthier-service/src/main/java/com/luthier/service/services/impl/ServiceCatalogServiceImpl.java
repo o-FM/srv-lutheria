@@ -1,7 +1,7 @@
 package com.luthier.service.services.impl;
 
-import com.luthier.errors.ConflictException;
-import com.luthier.errors.NotFoundException;
+import com.luthier.shared.errors.ConflictException;
+import com.luthier.shared.errors.NotFoundException;
 import com.luthier.service.domain.entities.ServiceCatalogEntity;
 import com.luthier.service.domain.records.ServiceCatalogRequest;
 import com.luthier.service.domain.records.ServiceCatalogResponse;

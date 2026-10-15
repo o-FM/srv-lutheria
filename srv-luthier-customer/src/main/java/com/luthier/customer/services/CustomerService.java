@@ -1,11 +1,11 @@
 package com.luthier.customer.services;
 
-import com.luthier.authorization.Access;
+import com.luthier.shared.authorization.Access;
 import com.luthier.customer.domain.records.CustomerRequest;
 import com.luthier.customer.domain.records.CustomerResponse;
 import com.luthier.customer.domain.records.InstrumentRequest;
 import com.luthier.customer.domain.records.InstrumentResponse;
-import com.luthier.web.PageResponse;
+import com.luthier.shared.web.PageResponse;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;

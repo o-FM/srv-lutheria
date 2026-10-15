@@ -1,12 +1,12 @@
 package com.luthier.product.services;
 
-import com.luthier.authorization.Access;
+import com.luthier.shared.authorization.Access;
 import com.luthier.product.domain.enums.ProductCategory;
 import com.luthier.product.domain.records.ProductRequest;
 import com.luthier.product.domain.records.ProductResponse;
 import com.luthier.product.domain.records.StockMovementRequest;
 import com.luthier.product.domain.records.StockMovementResponse;
-import com.luthier.web.PageResponse;
+import com.luthier.shared.web.PageResponse;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;

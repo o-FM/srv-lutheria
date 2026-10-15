@@ -1,7 +1,7 @@
 package com.luthier.product.domain.entities;
 
 import com.luthier.product.domain.enums.MovementType;
-import com.luthier.tenancy.TenantScopedEntity;
+import com.luthier.shared.tenancy.TenantScopedEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

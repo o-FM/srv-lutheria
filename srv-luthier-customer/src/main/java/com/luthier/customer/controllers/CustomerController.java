@@ -5,7 +5,7 @@ import com.luthier.customer.domain.records.CustomerResponse;
 import com.luthier.customer.domain.records.InstrumentRequest;
 import com.luthier.customer.domain.records.InstrumentResponse;
 import com.luthier.customer.services.CustomerService;
-import com.luthier.web.PageResponse;
+import com.luthier.shared.web.PageResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;

@@ -1,8 +1,8 @@
 package com.luthier.product.services.impl;
 
-import com.luthier.errors.BadRequestException;
-import com.luthier.errors.ConflictException;
-import com.luthier.errors.NotFoundException;
+import com.luthier.shared.errors.BadRequestException;
+import com.luthier.shared.errors.ConflictException;
+import com.luthier.shared.errors.NotFoundException;
 import com.luthier.product.StockLow;
 import com.luthier.product.domain.entities.ProductEntity;
 import com.luthier.product.domain.entities.ProductEntity.ProductData;
@@ -16,8 +16,8 @@ import com.luthier.product.domain.records.StockMovementResponse;
 import com.luthier.product.domain.repositories.ProductRepository;
 import com.luthier.product.domain.repositories.StockMovementRepository;
 import com.luthier.product.services.ProductService;
-import com.luthier.tenancy.TenantContext;
-import com.luthier.web.PageResponse;
+import com.luthier.shared.tenancy.TenantContext;
+import com.luthier.shared.web.PageResponse;
 import java.util.Locale;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;

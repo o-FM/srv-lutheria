@@ -2,7 +2,7 @@ package com.luthier.product.domain.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.luthier.errors.BadRequestException;
+import com.luthier.shared.errors.BadRequestException;
 import java.util.Arrays;
 
 /** Igual ao StockMovement.type do front. AJUSTE define o saldo absoluto (inventário). */

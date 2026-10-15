@@ -1,6 +1,6 @@
 package com.luthier.service.domain.entities;
 
-import com.luthier.tenancy.TenantScopedEntity;
+import com.luthier.shared.tenancy.TenantScopedEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

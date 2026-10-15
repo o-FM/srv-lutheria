@@ -1,6 +1,6 @@
 package com.luthier.customer.domain.records;
 
-import com.luthier.validation.ValidCpf;
+import com.luthier.shared.validation.ValidCpf;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
