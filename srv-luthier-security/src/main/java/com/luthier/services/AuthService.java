@@ -1,5 +1,6 @@
 package com.luthier.services;
 
+import com.luthier.domain.entities.UserEntity;
 import com.luthier.domain.records.LoginRequest;
 import com.luthier.domain.records.RefreshRequest;
 import com.luthier.domain.records.TokenResponse;
@@ -14,5 +15,8 @@ public interface AuthService {
 
   /** Encerra a sessão (revoga toda a família do refresh token). Idempotente. */
   void logout(RefreshRequest request);
+
+  /** Abre uma sessão nova (família de refresh nova) para um usuário já autenticado/recém-criado. */
+  TokenResponse startSession(UserEntity user);
 }
 

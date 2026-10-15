@@ -5,9 +5,13 @@ import com.luthier.domain.records.UpdateProfileRequest;
 import com.luthier.domain.records.UserResponse;
 import com.luthier.services.UserManagementService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +35,16 @@ public class UserController {
   @ResponseStatus(HttpStatus.CREATED)
   public UserResponse create(@Valid @RequestBody CreateUserRequest request) {
     return userManagementService.create(request);
+  }
+
+  @GetMapping
+  public List<UserResponse> list() {
+    return userManagementService.list();
+  }
+
+  @GetMapping("/me")
+  public UserResponse me(@AuthenticationPrincipal Jwt jwt) {
+    return userManagementService.me(UUID.fromString(jwt.getClaimAsString("uid")));
   }
 
   @PatchMapping("/{id}/profile")

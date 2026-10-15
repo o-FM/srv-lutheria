@@ -7,6 +7,13 @@ app:
         - http://localhost:3000
 
 spring:
+  # Sem migrations por enquanto (decisão do time): o Hibernate gera o schema.
+  # Ao adotar Flyway, trocar para "validate" e habilitar o flyway.
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: update
   # MOVIDO do application.yaml: console do H2 só em dev
   h2:
     console:
@@ -25,4 +32,5 @@ luthieria:
   admin:
     senha: ${ADMIN_SENHA:dev-admin-12345}
   jwt:
+    expiracao-minutos: 15
     secret: ${JWT_SECRET:dev-only-secret-troque-em-producao-min-32-bytes!!}

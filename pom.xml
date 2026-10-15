@@ -17,13 +17,14 @@
 	<name>srv-luthieria</name>
 
 	<modules>
+		<module>srv-luthier-parent</module>
 		<module>srv-luthier-shared</module>
 		<module>srv-luthier-security</module>
 		<module>srv-luthier-customer</module>
 		<module>srv-luthier-product</module>
 		<module>srv-luthier-service</module>
 		<module>srv-luthier-notification</module>
-		<module>srv-luthier-parent</module>
+		<module>srv-luthier-app</module>
 	</modules>
 
 	<properties>

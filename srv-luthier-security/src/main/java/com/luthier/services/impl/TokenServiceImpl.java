@@ -40,6 +40,8 @@ public class TokenServiceImpl implements TokenService {
         .issuedAt(now)
         .expiresAt(now.plus(expirationInMinutes, ChronoUnit.MINUTES))
         .claim("uid", user.getUuid().toString())
+        // tenant (luthieria) do usuário: o TenantContextFilter usa para isolar os dados
+        .claim("tid", user.getTenantId().toString())
         // lido pelo JwtAuthenticationConverter (JwtConfig) e vira ROLE_<valor>
         .claim("roles", List.of(user.getProfile().getValue()))
         .build();

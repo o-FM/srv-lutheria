@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,6 +61,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   ResponseEntity<ProblemDetail> handleNotFound(NotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage()));
+  }
+
+  @ExceptionHandler(BadRequestException.class)
+  ResponseEntity<ProblemDetail> handleBadRequest(BadRequestException ex) {
+    return ResponseEntity.badRequest()
+        .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage()));
+  }
+
+  /**
+   * Lock otimista (@Version): outra pessoa alterou o mesmo registro ao mesmo tempo
+   * (ex.: duas baixas de estoque simultâneas). O cliente deve recarregar e tentar de novo.
+   */
+  @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+  ResponseEntity<ProblemDetail> handleOptimisticLock(ObjectOptimisticLockingFailureException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+            "Registro alterado por outra pessoa. Recarregue e tente novamente."));
   }
 
   @ExceptionHandler(ConflictException.class)

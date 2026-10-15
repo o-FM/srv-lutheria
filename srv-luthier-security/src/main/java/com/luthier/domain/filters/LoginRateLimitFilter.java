@@ -22,7 +22,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class LoginRateLimitFilter extends OncePerRequestFilter {
 
   private static final Set<String> PATHS = Set.of(
-      "/auth/login", "/auth/refresh", "/auth/forgot-password", "/auth/reset-password");
+      "/auth/login", "/auth/refresh", "/auth/forgot-password", "/auth/reset-password",
+      "/auth/register");
 
   private final int capacity;
   private final Duration refillPeriod;

@@ -3,16 +3,14 @@ package com.luthier.controllers;
 import com.luthier.domain.records.ForgotPasswordRequest;
 import com.luthier.domain.records.LoginRequest;
 import com.luthier.domain.records.RefreshRequest;
+import com.luthier.domain.records.RegisterTenantRequest;
 import com.luthier.domain.records.ResetPasswordRequest;
 import com.luthier.domain.records.TokenResponse;
 import com.luthier.services.AuthService;
 import com.luthier.services.PasswordRecoveryService;
-import com.luthier.services.TokenService;
+import com.luthier.services.TenantRegistrationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,10 +25,20 @@ public class AuthController {
 
   private final AuthService authService;
   private final PasswordRecoveryService passwordRecoveryService;
+  private final TenantRegistrationService tenantRegistrationService;
 
-  public AuthController(AuthService authService, PasswordRecoveryService passwordRecoveryService) {
+  public AuthController(AuthService authService, PasswordRecoveryService passwordRecoveryService,
+      TenantRegistrationService tenantRegistrationService) {
     this.authService = authService;
     this.passwordRecoveryService = passwordRecoveryService;
+    this.tenantRegistrationService = tenantRegistrationService;
+  }
+
+  /** Cadastro de uma nova luthieria + dono. Já devolve a sessão aberta. */
+  @PostMapping("/register")
+  @ResponseStatus(HttpStatus.CREATED)
+  public TokenResponse register(@Valid @RequestBody RegisterTenantRequest request) {
+    return tenantRegistrationService.register(request);
   }
 
   @PostMapping("/login")

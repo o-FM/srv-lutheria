@@ -1,5 +1,6 @@
 package com.luthier.services.impl;
 
+import com.luthier.configs.SegurancaProperties;
 import com.luthier.domain.entities.RefreshTokenEntity;
 import com.luthier.domain.entities.UserEntity;
 import com.luthier.domain.errors.InvalidTokenException;
@@ -7,6 +8,7 @@ import com.luthier.domain.records.LoginRequest;
 import com.luthier.domain.records.RefreshRequest;
 import com.luthier.domain.records.TokenResponse;
 import com.luthier.domain.repositories.RefreshTokenRepository;
+import com.luthier.domain.repositories.TenantRepository;
 import com.luthier.domain.repositories.UserRepository;
 import com.luthier.services.AuthService;
 import com.luthier.services.TokenService;
@@ -25,19 +27,23 @@ public class AuthServiceImpl implements AuthService {
   private final AuthenticationManager authenticationManager;
   private final UserRepository userRepository;
   private final RefreshTokenRepository refreshTokenRepository;
+  private final TenantRepository tenantRepository;
   private final TokenService tokenService;
   private final Duration refreshTtl;
 
   public AuthServiceImpl(AuthenticationManager authenticationManager, UserRepository userRepository,
-      RefreshTokenRepository refreshTokenRepository, TokenService tokenService, Duration refreshTtl) {
+      RefreshTokenRepository refreshTokenRepository, TenantRepository tenantRepository,
+      TokenService tokenService, SegurancaProperties props) {
     this.authenticationManager = authenticationManager;
     this.userRepository = userRepository;
     this.refreshTokenRepository = refreshTokenRepository;
+    this.tenantRepository = tenantRepository;
     this.tokenService = tokenService;
-    this.refreshTtl = refreshTtl;
+    this.refreshTtl = Duration.ofDays(props.tokens().refreshDays());
   }
 
   @Override
+  @Transactional
   public TokenResponse login(LoginRequest request) {
     var email = request.email().strip();
 
@@ -79,9 +85,10 @@ public class AuthServiceImpl implements AuthService {
       throw InvalidTokenException.refresh();
     }
 
-    // Usuário desativado/removido depois do login não consegue renovar sessão
+    // Usuário (ou luthieria) desativado depois do login não consegue renovar sessão
     var user = userRepository.findById(stored.getUserId())
         .filter(UserEntity::isActive)
+        .filter(u -> tenantRepository.isActive(u.getTenantId()))
         .orElseThrow(InvalidTokenException::refresh);
 
     stored.revoke(now);
@@ -95,6 +102,12 @@ public class AuthServiceImpl implements AuthService {
     // Idempotente: token desconhecido não gera erro (e não revela nada)
     refreshTokenRepository.findByTokenHash(OpaqueTokens.hash(request.refreshToken()))
         .ifPresent(t -> refreshTokenRepository.revokeFamily(t.getFamilyId(), Instant.now()));
+  }
+
+  @Override
+  @Transactional
+  public TokenResponse startSession(UserEntity user) {
+    return issue(user, UUID.randomUUID());
   }
 
   private TokenResponse issue(UserEntity user, UUID uuid) {

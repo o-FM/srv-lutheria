@@ -8,6 +8,7 @@
     <groupId>com.luthier</groupId>
     <artifactId>srv-luthier-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../srv-luthier-parent/pom.xml</relativePath>
   </parent>
 
   <artifactId>srv-luthier-security</artifactId>
