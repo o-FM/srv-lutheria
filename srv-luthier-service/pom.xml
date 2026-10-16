@@ -19,6 +19,15 @@
       <groupId>com.luthier</groupId>
       <artifactId>srv-luthier-shared</artifactId>
     </dependency>
+    <!-- Único módulo de negócio que usa outros: só pelas APIs públicas (CustomerQueries, ProductQueries) -->
+    <dependency>
+      <groupId>com.luthier</groupId>
+      <artifactId>srv-luthier-customer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.luthier</groupId>
+      <artifactId>srv-luthier-product</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>

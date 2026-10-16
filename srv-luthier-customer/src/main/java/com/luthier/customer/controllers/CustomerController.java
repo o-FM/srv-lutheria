@@ -5,7 +5,7 @@ import com.luthier.customer.domain.records.CustomerResponse;
 import com.luthier.customer.domain.records.InstrumentRequest;
 import com.luthier.customer.domain.records.InstrumentResponse;
 import com.luthier.customer.services.CustomerService;
-import com.luthier.web.PageResponse;
+import com.luthier.shared.web.PageResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -69,6 +69,13 @@ public class CustomerController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deactivate(@PathVariable UUID id) {
     customerService.deactivate(id);
+  }
+
+  /** LGPD: eliminação dos dados pessoais (mantém o histórico de OS sem identificar a pessoa). */
+  @PostMapping("/{id}/anonymize")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void anonymize(@PathVariable UUID id) {
+    customerService.anonymize(id);
   }
 
   @PostMapping("/{id}/instruments")

@@ -1,6 +1,6 @@
 package com.luthier.customer.domain.entities;
 
-import com.luthier.tenancy.TenantScopedEntity;
+import com.luthier.shared.tenancy.TenantScopedEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -70,6 +70,20 @@ public class CustomerEntity extends TenantScopedEntity {
   }
 
   public void deactivate() { this.active = false; }
+
+  /**
+   * LGPD: apaga os dados pessoais mantendo o registro (o ID continua referenciado por OS e
+   * pagamentos, que a oficina precisa guardar por obrigação fiscal). Irreversível.
+   */
+  public void anonymize() {
+    this.name = "Cliente anonimizado";
+    this.phone = "00000000000";
+    this.email = null;
+    this.cpf = null;
+    this.address = null;
+    this.notes = null;
+    this.active = false;
+  }
 
   public UUID getId() { return id; }
   public String getName() { return name; }

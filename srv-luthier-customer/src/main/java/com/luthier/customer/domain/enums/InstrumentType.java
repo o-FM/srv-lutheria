@@ -2,7 +2,7 @@ package com.luthier.customer.domain.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.luthier.errors.BadRequestException;
+import com.luthier.shared.errors.BadRequestException;
 import java.util.Arrays;
 
 /** Valores na API iguais ao front (src/types/index.ts: InstrumentType). */

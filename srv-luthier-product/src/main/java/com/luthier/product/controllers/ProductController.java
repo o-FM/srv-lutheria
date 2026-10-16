@@ -6,7 +6,7 @@ import com.luthier.product.domain.records.ProductResponse;
 import com.luthier.product.domain.records.StockMovementRequest;
 import com.luthier.product.domain.records.StockMovementResponse;
 import com.luthier.product.services.ProductService;
-import com.luthier.web.PageResponse;
+import com.luthier.shared.web.PageResponse;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.UUID;

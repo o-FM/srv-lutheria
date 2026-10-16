@@ -1,7 +1,7 @@
 package com.luthier.customer.domain.records;
 
 import com.luthier.customer.domain.entities.CustomerEntity;
-import com.luthier.validation.Cpf;
+import com.luthier.shared.validation.Cpf;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;

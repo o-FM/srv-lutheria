@@ -1,6 +1,7 @@
 package com.luthier.customer.services.impl;
 
 import com.luthier.customer.CustomerQueries;
+import com.luthier.customer.CustomerAnonymized;
 import com.luthier.customer.CustomerRegistered;
 import com.luthier.customer.domain.entities.CustomerEntity;
 import com.luthier.customer.domain.entities.InstrumentEntity;
@@ -12,12 +13,13 @@ import com.luthier.customer.domain.records.InstrumentResponse;
 import com.luthier.customer.domain.repositories.CustomerRepository;
 import com.luthier.customer.domain.repositories.InstrumentRepository;
 import com.luthier.customer.services.CustomerService;
-import com.luthier.errors.ConflictException;
-import com.luthier.errors.NotFoundException;
-import com.luthier.tenancy.TenantContext;
-import com.luthier.validation.Cpf;
-import com.luthier.validation.Phone;
-import com.luthier.web.PageResponse;
+import com.luthier.shared.audit.AuditEvent;
+import com.luthier.shared.errors.ConflictException;
+import com.luthier.shared.errors.NotFoundException;
+import com.luthier.shared.tenancy.TenantContext;
+import com.luthier.shared.validation.Cpf;
+import com.luthier.shared.validation.Phone;
+import com.luthier.shared.web.PageResponse;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -108,6 +110,16 @@ public class CustomerServiceImpl implements CustomerService, CustomerQueries {
   @Override
   public void deactivate(UUID id) {
     find(id).deactivate();
+    events.publishEvent(AuditEvent.of("CUSTOMER_DEACTIVATED", "customer", id, null));
+  }
+
+  @Override
+  public void anonymize(UUID id) {
+    var customer = customerRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Customer not found!"));
+    customer.anonymize();
+    events.publishEvent(new CustomerAnonymized(TenantContext.require(), id));
+    events.publishEvent(AuditEvent.of("CUSTOMER_ANONYMIZED", "customer", id, null));
   }
 
   @Override
@@ -155,6 +167,25 @@ public class CustomerServiceImpl implements CustomerService, CustomerQueries {
     return instrumentRepository.findById(instrumentId)
         .map(i -> new InstrumentSummary(i.getId(), i.getCustomerId(), i.getType().getValue(),
             i.getBrand(), i.getModel()));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<CustomerExport> exportData(UUID customerId) {
+    return customerRepository.findById(customerId).map(c -> new CustomerExport(c.getId(),
+        c.getName(), c.getPhone(), c.getEmail(), c.getCpf(), c.getAddress(), c.getNotes(),
+        c.isActive(), c.getCreatedAt(),
+        instrumentRepository.findAllByCustomerIdOrderByCreatedAtDesc(customerId).stream()
+            .map(i -> new InstrumentExport(i.getId(), i.getType().getValue(), i.getBrand(),
+                i.getModel(), i.getSerialNumber(), i.getYear(), i.getFinishColor(),
+                i.getConditionNotes()))
+            .toList()));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public long countActive() {
+    return customerRepository.countByActiveTrue();
   }
 
   // ---- helpers ----

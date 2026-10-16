@@ -1,0 +1,3678 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "OpenAPI definition",
+        "version": "v0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8090",
+            "description": "Generated server url"
+        }
+    ],
+    "paths": {
+        "/service-catalog/{id}": {
+            "get": {
+                "tags": [
+                    "service-catalog-controller"
+                ],
+                "operationId": "get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServiceCatalogResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "service-catalog-controller"
+                ],
+                "operationId": "update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ServiceCatalogRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServiceCatalogResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "service-catalog-controller"
+                ],
+                "operationId": "deactivate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/products/{id}": {
+            "get": {
+                "tags": [
+                    "product-controller"
+                ],
+                "operationId": "get_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "product-controller"
+                ],
+                "operationId": "update_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProductRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "product-controller"
+                ],
+                "operationId": "deactivate_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/customers/{id}": {
+            "get": {
+                "tags": [
+                    "customer-controller"
+                ],
+                "operationId": "get_2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "customer-controller"
+                ],
+                "operationId": "update_2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomerRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "customer-controller"
+                ],
+                "operationId": "deactivate_2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/customers/{id}/instruments/{instrumentId}": {
+            "put": {
+                "tags": [
+                    "customer-controller"
+                ],
+                "operationId": "updateInstrument",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "instrumentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InstrumentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InstrumentResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "tags": [
+                    "user-controller"
+                ],
+                "operationId": "list",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/UserResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "user-controller"
+                ],
+                "operationId": "create",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateUserRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}/deactivate": {
+            "post": {
+                "tags": [
+                    "user-controller"
+                ],
+                "operationId": "deactivate_3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}/activate": {
+            "post": {
+                "tags": [
+                    "user-controller"
+                ],
+                "operationId": "activate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders": {
+            "get": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "search",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "customerId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "number",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageResponseOrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "create_1",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateOrder"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}/status": {
+            "post": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "changeStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChangeStatus"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}/services": {
+            "post": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "addService",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddService"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}/services/{itemId}/done": {
+            "post": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "markServiceDone",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}/quote/send": {
+            "post": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "sendQuote",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}/quote/reject": {
+            "post": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "rejectQuote",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RejectQuote"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}/quote/approve": {
+            "post": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "approveQuote",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}/payments": {
+            "post": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "receivePayment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReceivePayment"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}/parts": {
+            "post": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "addPart",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddPart"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}/notes": {
+            "post": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "addNote",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddNote"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-catalog": {
+            "get": {
+                "tags": [
+                    "service-catalog-controller"
+                ],
+                "operationId": "list_1",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ServiceCatalogResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "service-catalog-controller"
+                ],
+                "operationId": "create_2",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ServiceCatalogRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServiceCatalogResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/products": {
+            "get": {
+                "tags": [
+                    "product-controller"
+                ],
+                "operationId": "search_1",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "lowStock",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageResponseProductResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "product-controller"
+                ],
+                "operationId": "create_3",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProductRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/products/{id}/movements": {
+            "get": {
+                "tags": [
+                    "product-controller"
+                ],
+                "operationId": "movements",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageResponseStockMovementResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "product-controller"
+                ],
+                "operationId": "move",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StockMovementRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StockMovementResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/portal/orders/{token}/quote/reject": {
+            "post": {
+                "tags": [
+                    "customer-portal-controller"
+                ],
+                "operationId": "reject",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]{32}$"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RejectQuote"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalOrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/portal/orders/{token}/quote/approve": {
+            "post": {
+                "tags": [
+                    "customer-portal-controller"
+                ],
+                "operationId": "approve",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]{32}$"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalOrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications/{id}/sent": {
+            "post": {
+                "tags": [
+                    "notification-controller"
+                ],
+                "operationId": "markSent",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotificationResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/customers": {
+            "get": {
+                "tags": [
+                    "customer-controller"
+                ],
+                "operationId": "search_2",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageResponseCustomerResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "customer-controller"
+                ],
+                "operationId": "create_4",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomerRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/customers/{id}/instruments": {
+            "get": {
+                "tags": [
+                    "customer-controller"
+                ],
+                "operationId": "listInstruments",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/InstrumentResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "customer-controller"
+                ],
+                "operationId": "addInstrument",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InstrumentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InstrumentResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/customers/{id}/anonymize": {
+            "post": {
+                "tags": [
+                    "customer-controller"
+                ],
+                "operationId": "anonymize",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "resetPassword",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResetPasswordRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "register",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterTenantRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "refresh",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefreshRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "logout",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefreshRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "login",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/forgot-password": {
+            "post": {
+                "tags": [
+                    "auth-controller"
+                ],
+                "operationId": "forgotPassword",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ForgotPasswordRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "202": {
+                        "description": "Accepted"
+                    }
+                }
+            }
+        },
+        "/users/{id}/profile": {
+            "patch": {
+                "tags": [
+                    "user-controller"
+                ],
+                "operationId": "changeProfile",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateProfileRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}": {
+            "get": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "get_3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "update_3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateOrder"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me": {
+            "get": {
+                "tags": [
+                    "user-controller"
+                ],
+                "operationId": "me",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reports/financial": {
+            "get": {
+                "tags": [
+                    "report-controller"
+                ],
+                "operationId": "financial",
+                "parameters": [
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Financial"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reports/dashboard": {
+            "get": {
+                "tags": [
+                    "report-controller"
+                ],
+                "operationId": "dashboard",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Dashboard"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/products/barcode/{code}": {
+            "get": {
+                "tags": [
+                    "product-controller"
+                ],
+                "operationId": "getByBarcode",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/privacy/customers/{id}/export": {
+            "get": {
+                "tags": [
+                    "privacy-controller"
+                ],
+                "operationId": "export",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerDataExport"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/portal/orders/{token}": {
+            "get": {
+                "tags": [
+                    "customer-portal-controller"
+                ],
+                "operationId": "view",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]{32}$"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalOrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications": {
+            "get": {
+                "tags": [
+                    "notification-controller"
+                ],
+                "operationId": "search_3",
+                "parameters": [
+                    {
+                        "name": "channel",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageResponseNotificationResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/audit-logs": {
+            "get": {
+                "tags": [
+                    "audit-controller"
+                ],
+                "operationId": "list_2",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageResponseAuditLogResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}/services/{itemId}": {
+            "delete": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "removeService",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}/parts/{partId}": {
+            "delete": {
+                "tags": [
+                    "service-order-controller"
+                ],
+                "operationId": "removePart",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "partId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ServiceCatalogRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "maxLength": 120,
+                        "minLength": 0
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 0
+                    },
+                    "laborPrice": {
+                        "type": "number",
+                        "minimum": 0.0
+                    },
+                    "estimatedDays": {
+                        "type": "integer",
+                        "format": "int32",
+                        "minimum": 0
+                    }
+                },
+                "required": [
+                    "laborPrice",
+                    "title"
+                ]
+            },
+            "ServiceCatalogResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "laborPrice": {
+                        "type": "number"
+                    },
+                    "estimatedDays": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "ProductRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 120,
+                        "minLength": 0
+                    },
+                    "category": {
+                        "type": "string",
+                        "enum": [
+                            "pecas",
+                            "cordas",
+                            "madeiras",
+                            "insumos"
+                        ]
+                    },
+                    "brand": {
+                        "type": "string",
+                        "maxLength": 60,
+                        "minLength": 0
+                    },
+                    "sku": {
+                        "type": "string",
+                        "maxLength": 40,
+                        "minLength": 0
+                    },
+                    "barcode": {
+                        "type": "string",
+                        "maxLength": 40,
+                        "minLength": 0
+                    },
+                    "unit": {
+                        "type": "string",
+                        "minLength": 1,
+                        "pattern": "un|jogo|m|ml|g"
+                    },
+                    "costPrice": {
+                        "type": "number",
+                        "minimum": 0.0
+                    },
+                    "salePrice": {
+                        "type": "number",
+                        "minimum": 0.0
+                    },
+                    "minQuantity": {
+                        "type": "integer",
+                        "format": "int32",
+                        "minimum": 0
+                    },
+                    "initialQuantity": {
+                        "type": "integer",
+                        "format": "int32",
+                        "minimum": 0
+                    },
+                    "location": {
+                        "type": "string",
+                        "maxLength": 60,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "category",
+                    "costPrice",
+                    "name",
+                    "salePrice",
+                    "sku",
+                    "unit"
+                ]
+            },
+            "ProductResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string",
+                        "enum": [
+                            "pecas",
+                            "cordas",
+                            "madeiras",
+                            "insumos"
+                        ]
+                    },
+                    "brand": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "barcode": {
+                        "type": "string"
+                    },
+                    "currentQuantity": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "minQuantity": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "lowStock": {
+                        "type": "boolean"
+                    },
+                    "unit": {
+                        "type": "string"
+                    },
+                    "costPrice": {
+                        "type": "number"
+                    },
+                    "salePrice": {
+                        "type": "number"
+                    },
+                    "location": {
+                        "type": "string"
+                    }
+                }
+            },
+            "CustomerRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "minLength": 0
+                    },
+                    "phone": {
+                        "type": "string",
+                        "minLength": 1,
+                        "pattern": "^\\D*(\\d\\D*){10,11}$"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 254,
+                        "minLength": 0
+                    },
+                    "cpf": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 0
+                    },
+                    "notes": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "name",
+                    "phone"
+                ]
+            },
+            "CustomerResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "maskedCpf": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "instruments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/InstrumentResponse"
+                        }
+                    }
+                }
+            },
+            "InstrumentResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "clientId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "violao_aco",
+                            "violao_nylon",
+                            "guitarra",
+                            "baixo",
+                            "cavaquinho",
+                            "viola",
+                            "violino",
+                            "outro"
+                        ]
+                    },
+                    "brand": {
+                        "type": "string"
+                    },
+                    "model": {
+                        "type": "string"
+                    },
+                    "serialNumber": {
+                        "type": "string"
+                    },
+                    "year": {
+                        "type": "string"
+                    },
+                    "finishColor": {
+                        "type": "string"
+                    },
+                    "stringsGauge": {
+                        "type": "string"
+                    },
+                    "tuningPreference": {
+                        "type": "string"
+                    },
+                    "actionHeight12thFret": {
+                        "type": "string"
+                    },
+                    "conditionNotes": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "InstrumentRequest": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "violao_aco",
+                            "violao_nylon",
+                            "guitarra",
+                            "baixo",
+                            "cavaquinho",
+                            "viola",
+                            "violino",
+                            "outro"
+                        ]
+                    },
+                    "brand": {
+                        "type": "string",
+                        "maxLength": 60,
+                        "minLength": 0
+                    },
+                    "model": {
+                        "type": "string",
+                        "maxLength": 80,
+                        "minLength": 0
+                    },
+                    "serialNumber": {
+                        "type": "string",
+                        "maxLength": 60,
+                        "minLength": 0
+                    },
+                    "year": {
+                        "type": "string",
+                        "maxLength": 10,
+                        "minLength": 0
+                    },
+                    "finishColor": {
+                        "type": "string",
+                        "maxLength": 60,
+                        "minLength": 0
+                    },
+                    "stringsGauge": {
+                        "type": "string",
+                        "maxLength": 30,
+                        "minLength": 0
+                    },
+                    "tuningPreference": {
+                        "type": "string",
+                        "maxLength": 60,
+                        "minLength": 0
+                    },
+                    "actionHeight12thFret": {
+                        "type": "string",
+                        "maxLength": 30,
+                        "minLength": 0
+                    },
+                    "conditionNotes": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "brand",
+                    "model",
+                    "type"
+                ]
+            },
+            "CreateUserRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "minLength": 0
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 254,
+                        "minLength": 0
+                    },
+                    "password": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "minLength": 12
+                    },
+                    "cpf": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "minLength": 0
+                    },
+                    "profile": {
+                        "type": "string",
+                        "enum": [
+                            "ADMIN",
+                            "LUTHIER",
+                            "ATENDENTE",
+                            "ESTOQUISTA"
+                        ]
+                    }
+                },
+                "required": [
+                    "email",
+                    "name",
+                    "password",
+                    "profile"
+                ]
+            },
+            "UserResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "tenantId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "maskedCpf": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    },
+                    "profile": {
+                        "type": "string",
+                        "enum": [
+                            "ADMIN",
+                            "LUTHIER",
+                            "ATENDENTE",
+                            "ESTOQUISTA"
+                        ]
+                    },
+                    "active": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "AddService": {
+                "type": "object",
+                "properties": {
+                    "catalogId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 120,
+                        "minLength": 0
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 0
+                    },
+                    "laborPrice": {
+                        "type": "number",
+                        "minimum": 0.0
+                    }
+                }
+            },
+            "CreateOrder": {
+                "type": "object",
+                "properties": {
+                    "customerId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "instrumentId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "priority": {
+                        "type": "string",
+                        "enum": [
+                            "baixa",
+                            "normal",
+                            "alta",
+                            "urgente"
+                        ]
+                    },
+                    "reportedIssue": {
+                        "type": "string",
+                        "maxLength": 2000,
+                        "minLength": 0
+                    },
+                    "estimatedDeliveryDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "services": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AddService"
+                        },
+                        "maxItems": 30,
+                        "minItems": 0
+                    }
+                },
+                "required": [
+                    "customerId",
+                    "instrumentId",
+                    "reportedIssue"
+                ]
+            },
+            "OrderResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "orderNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "clientId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "instrumentId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "recebido",
+                            "diagnostico",
+                            "orcamento",
+                            "aguardando_aprovacao",
+                            "em_execucao",
+                            "pronto",
+                            "entregue",
+                            "cancelado"
+                        ]
+                    },
+                    "priority": {
+                        "type": "string",
+                        "enum": [
+                            "baixa",
+                            "normal",
+                            "alta",
+                            "urgente"
+                        ]
+                    },
+                    "reportedIssue": {
+                        "type": "string"
+                    },
+                    "diagnosisNotes": {
+                        "type": "string"
+                    },
+                    "technicianNotes": {
+                        "type": "string"
+                    },
+                    "entryDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "estimatedDeliveryDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "completedDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "deliveredDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "services": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ServiceItem"
+                        }
+                    },
+                    "parts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Part"
+                        }
+                    },
+                    "quote": {
+                        "$ref": "#/components/schemas/Quote"
+                    },
+                    "timeline": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Timeline"
+                        }
+                    },
+                    "payments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Payment"
+                        }
+                    },
+                    "totalAmount": {
+                        "type": "number"
+                    },
+                    "paidAmount": {
+                        "type": "number"
+                    },
+                    "balance": {
+                        "type": "number"
+                    },
+                    "clientTrackingToken": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Part": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "stockItemId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "stockItemName": {
+                        "type": "string"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "unitPrice": {
+                        "type": "number"
+                    },
+                    "total": {
+                        "type": "number"
+                    }
+                }
+            },
+            "Payment": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "amount": {
+                        "type": "number"
+                    },
+                    "method": {
+                        "type": "string",
+                        "enum": [
+                            "pix",
+                            "cartao_credito",
+                            "cartao_debito",
+                            "dinheiro",
+                            "transferencia"
+                        ]
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "receiptNumber": {
+                        "type": "string"
+                    },
+                    "receivedBy": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Quote": {
+                "type": "object",
+                "properties": {
+                    "laborTotal": {
+                        "type": "number"
+                    },
+                    "partsTotal": {
+                        "type": "number"
+                    },
+                    "discount": {
+                        "type": "number"
+                    },
+                    "grandTotal": {
+                        "type": "number"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "pendente",
+                            "aprovado",
+                            "rejeitado"
+                        ]
+                    },
+                    "sentAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "answeredAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "rejectionReason": {
+                        "type": "string"
+                    },
+                    "paymentTerms": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ServiceItem": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "catalogId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "laborPrice": {
+                        "type": "number"
+                    },
+                    "done": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Timeline": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "status_change",
+                            "quote_sent",
+                            "quote_approved",
+                            "quote_rejected",
+                            "service_done",
+                            "payment_received",
+                            "note_added"
+                        ]
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ChangeStatus": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "recebido",
+                            "diagnostico",
+                            "orcamento",
+                            "aguardando_aprovacao",
+                            "em_execucao",
+                            "pronto",
+                            "entregue",
+                            "cancelado"
+                        ]
+                    },
+                    "note": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "status"
+                ]
+            },
+            "RejectQuote": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 0
+                    }
+                }
+            },
+            "ReceivePayment": {
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "number",
+                        "minimum": 0.01
+                    },
+                    "method": {
+                        "type": "string",
+                        "enum": [
+                            "pix",
+                            "cartao_credito",
+                            "cartao_debito",
+                            "dinheiro",
+                            "transferencia"
+                        ]
+                    }
+                },
+                "required": [
+                    "amount",
+                    "method"
+                ]
+            },
+            "AddPart": {
+                "type": "object",
+                "properties": {
+                    "productId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "format": "int32",
+                        "minimum": 0
+                    }
+                },
+                "required": [
+                    "productId",
+                    "quantity"
+                ]
+            },
+            "AddNote": {
+                "type": "object",
+                "properties": {
+                    "note": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "note"
+                ]
+            },
+            "StockMovementRequest": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "entrada",
+                            "saida",
+                            "ajuste"
+                        ]
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "format": "int32",
+                        "minimum": 0
+                    },
+                    "reason": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 0
+                    },
+                    "orderId": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "quantity",
+                    "reason",
+                    "type"
+                ]
+            },
+            "StockMovementResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "stockItemId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "entrada",
+                            "saida",
+                            "ajuste"
+                        ]
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "delta": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "balanceAfter": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "reason": {
+                        "type": "string"
+                    },
+                    "orderId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    }
+                }
+            },
+            "PortalOrderResponse": {
+                "type": "object",
+                "properties": {
+                    "orderNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "customerFirstName": {
+                        "type": "string"
+                    },
+                    "instrument": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "recebido",
+                            "diagnostico",
+                            "orcamento",
+                            "aguardando_aprovacao",
+                            "em_execucao",
+                            "pronto",
+                            "entregue",
+                            "cancelado"
+                        ]
+                    },
+                    "statusLabel": {
+                        "type": "string"
+                    },
+                    "estimatedDeliveryDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "services": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ServiceItem"
+                        }
+                    },
+                    "parts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Part"
+                        }
+                    },
+                    "quote": {
+                        "$ref": "#/components/schemas/Quote"
+                    },
+                    "timeline": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Timeline"
+                        }
+                    }
+                }
+            },
+            "NotificationResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "channel": {
+                        "type": "string",
+                        "enum": [
+                            "email",
+                            "whatsapp",
+                            "interno"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "enviado",
+                            "falhou",
+                            "pendente"
+                        ]
+                    },
+                    "recipient": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "actionUrl": {
+                        "type": "string"
+                    },
+                    "relatedType": {
+                        "type": "string"
+                    },
+                    "relatedId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "sentAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "error": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ResetPasswordRequest": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "maxLength": 256,
+                        "minLength": 0
+                    },
+                    "newPassword": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "minLength": 12
+                    }
+                },
+                "required": [
+                    "newPassword",
+                    "token"
+                ]
+            },
+            "Owner": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "minLength": 0
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 254,
+                        "minLength": 0
+                    },
+                    "password": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "minLength": 12
+                    },
+                    "cpf": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "email",
+                    "name",
+                    "password"
+                ]
+            },
+            "RegisterTenantRequest": {
+                "type": "object",
+                "properties": {
+                    "workshop": {
+                        "$ref": "#/components/schemas/Workshop"
+                    },
+                    "owner": {
+                        "$ref": "#/components/schemas/Owner"
+                    }
+                },
+                "required": [
+                    "owner",
+                    "workshop"
+                ]
+            },
+            "Workshop": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 120,
+                        "minLength": 0
+                    },
+                    "document": {
+                        "type": "string",
+                        "pattern": "^[\\d./-]{11,18}$"
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            },
+            "TokenResponse": {
+                "type": "object",
+                "properties": {
+                    "accessToken": {
+                        "type": "string"
+                    },
+                    "refreshToken": {
+                        "type": "string"
+                    },
+                    "tokenType": {
+                        "type": "string"
+                    },
+                    "expiresIn": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                }
+            },
+            "RefreshRequest": {
+                "type": "object",
+                "properties": {
+                    "refreshToken": {
+                        "type": "string",
+                        "maxLength": 2048,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "refreshToken"
+                ]
+            },
+            "LoginRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 254,
+                        "minLength": 0
+                    },
+                    "password": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "minLength": 8
+                    }
+                },
+                "required": [
+                    "email",
+                    "password"
+                ]
+            },
+            "ForgotPasswordRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 254,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "email"
+                ]
+            },
+            "UpdateProfileRequest": {
+                "type": "object",
+                "properties": {
+                    "profile": {
+                        "type": "string",
+                        "enum": [
+                            "ADMIN",
+                            "LUTHIER",
+                            "ATENDENTE",
+                            "ESTOQUISTA"
+                        ]
+                    }
+                },
+                "required": [
+                    "profile"
+                ]
+            },
+            "UpdateOrder": {
+                "type": "object",
+                "properties": {
+                    "priority": {
+                        "type": "string",
+                        "enum": [
+                            "baixa",
+                            "normal",
+                            "alta",
+                            "urgente"
+                        ]
+                    },
+                    "diagnosisNotes": {
+                        "type": "string",
+                        "maxLength": 2000,
+                        "minLength": 0
+                    },
+                    "technicianNotes": {
+                        "type": "string",
+                        "maxLength": 2000,
+                        "minLength": 0
+                    },
+                    "estimatedDeliveryDate": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "discount": {
+                        "type": "number",
+                        "minimum": 0.0
+                    },
+                    "paymentTerms": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 0
+                    }
+                }
+            },
+            "PageResponseOrderResponse": {
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OrderResponse"
+                        }
+                    },
+                    "page": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "Financial": {
+                "type": "object",
+                "properties": {
+                    "from": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "to": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "received": {
+                        "type": "number"
+                    },
+                    "byMethod": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/MethodTotal"
+                        }
+                    },
+                    "deliveredOrders": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "averageTicket": {
+                        "type": "number"
+                    },
+                    "receivable": {
+                        "type": "number"
+                    }
+                }
+            },
+            "MethodTotal": {
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "number"
+                    },
+                    "count": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                }
+            },
+            "Dashboard": {
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "ordersByStatus": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    "openOrders": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "dueToday": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "overdue": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "readyForPickup": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "awaitingApproval": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "lowStockItems": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "activeCustomers": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                }
+            },
+            "PageResponseProductResponse": {
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProductResponse"
+                        }
+                    },
+                    "page": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "PageResponseStockMovementResponse": {
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StockMovementResponse"
+                        }
+                    },
+                    "page": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "CustomerDataExport": {
+                "type": "object",
+                "properties": {
+                    "generatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "workshopNotice": {
+                        "type": "string"
+                    },
+                    "customer": {
+                        "$ref": "#/components/schemas/CustomerExport"
+                    },
+                    "serviceOrders": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OrderResponse"
+                        }
+                    }
+                }
+            },
+            "CustomerExport": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "cpf": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "instruments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/InstrumentExport"
+                        }
+                    }
+                }
+            },
+            "InstrumentExport": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "brand": {
+                        "type": "string"
+                    },
+                    "model": {
+                        "type": "string"
+                    },
+                    "serialNumber": {
+                        "type": "string"
+                    },
+                    "year": {
+                        "type": "string"
+                    },
+                    "finishColor": {
+                        "type": "string"
+                    },
+                    "conditionNotes": {
+                        "type": "string"
+                    }
+                }
+            },
+            "PageResponseNotificationResponse": {
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NotificationResponse"
+                        }
+                    },
+                    "page": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "PageResponseCustomerResponse": {
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CustomerResponse"
+                        }
+                    },
+                    "page": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "AuditLogResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "actor": {
+                        "type": "string"
+                    },
+                    "action": {
+                        "type": "string"
+                    },
+                    "resourceType": {
+                        "type": "string"
+                    },
+                    "resourceId": {
+                        "type": "string"
+                    },
+                    "details": {
+                        "type": "string"
+                    },
+                    "ip": {
+                        "type": "string"
+                    }
+                }
+            },
+            "PageResponseAuditLogResponse": {
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AuditLogResponse"
+                        }
+                    },
+                    "page": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            }
+        }
+    }
+}

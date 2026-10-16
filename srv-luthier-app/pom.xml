@@ -35,6 +35,10 @@
       <groupId>com.luthier</groupId>
       <artifactId>srv-luthier-service</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.luthier</groupId>
+      <artifactId>srv-luthier-notification</artifactId>
+    </dependency>
 
     <!-- Test -->
     <dependency>
@@ -50,6 +54,11 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-micrometer-metrics-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

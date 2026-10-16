@@ -1,11 +1,11 @@
 package com.luthier.customer.services;
 
-import com.luthier.authorization.Access;
+import com.luthier.shared.authorization.Access;
 import com.luthier.customer.domain.records.CustomerRequest;
 import com.luthier.customer.domain.records.CustomerResponse;
 import com.luthier.customer.domain.records.InstrumentRequest;
 import com.luthier.customer.domain.records.InstrumentResponse;
-import com.luthier.web.PageResponse;
+import com.luthier.shared.web.PageResponse;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +29,10 @@ public interface CustomerService {
   /** Exclusão lógica: o histórico de OS continua apontando para o cliente. */
   @PreAuthorize(Access.ADMIN)
   void deactivate(UUID id);
+
+  /** LGPD: eliminação dos dados pessoais a pedido do titular. Irreversível. */
+  @PreAuthorize(Access.ADMIN)
+  void anonymize(UUID id);
 
   @PreAuthorize(Access.CUSTOMER_DESK)
   InstrumentResponse addInstrument(UUID customerId, InstrumentRequest request);

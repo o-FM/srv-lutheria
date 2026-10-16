@@ -27,6 +27,10 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
 
   boolean existsByBarcodeAndIdNot(String barcode, UUID id);
 
+  @Query("select count(p) from ProductEntity p where p.active = true "
+      + "and p.currentQuantity <= p.minQuantity")
+  long countLowStock();
+
   @Query("""
       select p from ProductEntity p
       where p.active = true
