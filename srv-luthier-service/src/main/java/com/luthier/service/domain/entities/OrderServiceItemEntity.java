@@ -57,6 +57,12 @@ public class OrderServiceItemEntity extends TenantScopedEntity {
 
   void markDone() { this.done = true; }
 
+  void update(String title, String description, BigDecimal laborPrice) {
+    if (title != null) this.title = title;
+    if (description != null) this.description = description.isBlank() ? null : description.strip();
+    this.laborPrice = laborPrice;
+  }
+
   public UUID getId() { return id; }
   public UUID getCatalogId() { return catalogId; }
   public String getTitle() { return title; }

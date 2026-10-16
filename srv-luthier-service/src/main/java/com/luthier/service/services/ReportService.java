@@ -12,7 +12,7 @@ public interface ReportService {
   @PreAuthorize(Access.ANY_STAFF)
   Dashboard dashboard();
 
-  /** Financeiro é restrito ao dono/luthier (canAccessFinancials do front). */
-  @PreAuthorize(Access.ADMIN_OR_LUTHIER)
+  /** Faturamento é restrito ao dono (ADMIN). */
+  @PreAuthorize(Access.ADMIN)
   Financial financial(LocalDate from, LocalDate to);
 }

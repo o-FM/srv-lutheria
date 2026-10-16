@@ -10,6 +10,7 @@ import com.luthier.notification.services.WhatsAppSender;
 import com.luthier.notification.services.impl.WhatsAppProperties;
 import com.luthier.security.CustomerAccessCodes;
 import com.luthier.security.WorkshopDirectory;
+import com.luthier.service.QuoteApprovedByCustomer;
 import com.luthier.service.ServiceOrderOpened;
 import com.luthier.shared.errors.BadRequestException;
 import com.luthier.shared.errors.NotFoundException;
@@ -28,7 +29,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * Acesso do cliente pelo WhatsApp:
- *  - OS aberta → mensagem "OS aberta" com o link da área do cliente + código de acesso
+ *  - OS aberta → mensagem "OS aberta" com o link de acompanhamento da OS (portal, sem login);
+ *  - orçamento aprovado pelo cliente no link → código de acesso à área do cliente
  *    (XXXX-XXXX, reutilizável por 90 dias; o código anterior deixa de valer);
  *  - balcão → "Enviar código de acesso" na ficha do cliente gera e envia um novo código;
  *  - cliente anonimizado (LGPD) → todos os códigos são revogados.
@@ -49,6 +51,12 @@ public class CustomerAccessListeners {
   @TransactionalEventListener
   public void on(ServiceOrderOpened event) {
     TenantContext.runAs(event.tenantId(), () -> handlers.orderOpened(event));
+  }
+
+  @Async
+  @TransactionalEventListener
+  public void on(QuoteApprovedByCustomer event) {
+    TenantContext.runAs(event.tenantId(), () -> handlers.quoteApproved(event));
   }
 
   @Async
@@ -91,14 +99,20 @@ public class CustomerAccessListeners {
       var workshop = workshops.find(e.tenantId()).orElse(null);
       if (customer == null || customer.phone() == null || workshop == null) return;
 
-      var link = frontendUrl + "/cliente";
+      var link = frontendUrl + "/acompanhar/" + e.trackingToken();
       var firstName = customer.name().split("\\s+")[0];
       send(customer, "OS #" + e.orderNumber() + " · OS aberta", props.templates().osAberta(),
           List.of(firstName, String.valueOf(e.orderNumber()), workshop.name(), link), null,
           "Olá %s! Sua OS #%d na %s foi aberta. Acompanhe e aprove orçamentos em %s"
               .formatted(firstName, e.orderNumber(), workshop.name(), link), e.orderId());
+    }
 
-      sendCode(customer, e.orderId());
+    /** Aprovou o orçamento pelo link: ganha acesso à área do cliente para acompanhar tudo. */
+    @Transactional
+    public void quoteApproved(QuoteApprovedByCustomer e) {
+      customers.findCustomer(e.customerId())
+          .filter(c -> c.phone() != null)
+          .ifPresent(c -> sendCode(c, e.orderId()));
     }
 
     /** Pedido do balcão (chamada síncrona, já dentro do tenant do atendente). */

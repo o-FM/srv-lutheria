@@ -17,6 +17,7 @@ import com.luthier.service.domain.records.OrderRequests.CreateOrder;
 import com.luthier.service.domain.records.OrderRequests.ReceivePayment;
 import com.luthier.service.domain.records.OrderRequests.RejectQuote;
 import com.luthier.service.domain.records.OrderRequests.UpdateOrder;
+import com.luthier.service.domain.records.OrderRequests.UpdateService;
 import com.luthier.service.domain.records.OrderResponse;
 import com.luthier.service.domain.repositories.OrderCounterRepository;
 import com.luthier.service.domain.repositories.ServiceCatalogRepository;
@@ -28,6 +29,7 @@ import com.luthier.shared.errors.ConflictException;
 import com.luthier.shared.errors.NotFoundException;
 import com.luthier.shared.tenancy.TenantContext;
 import com.luthier.shared.web.PageResponse;
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.UUID;
@@ -115,6 +117,16 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
   @Override
   public OrderResponse removeService(UUID id, UUID itemId) {
     return mutate(id, o -> o.removeService(itemId));
+  }
+
+  @Override
+  public OrderResponse updateService(UUID id, UUID itemId, UpdateService r, String user) {
+    return mutate(id, o -> o.updateService(itemId, blankToNull(r.title()), r.description(),
+        r.laborPrice(), user));
+  }
+
+  private static String blankToNull(String value) {
+    return value == null || value.isBlank() ? null : value.strip();
   }
 
   @Override
@@ -214,10 +226,11 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
           s.laborPrice() != null ? s.laborPrice() : catalog.getLaborPrice());
       return;
     }
-    if (s.title() == null || s.title().isBlank() || s.laborPrice() == null) {
-      throw new BadRequestException("Informe catalogId ou título e preço do serviço");
+    if (s.title() == null || s.title().isBlank()) {
+      throw new BadRequestException("Informe catalogId ou o título do serviço");
     }
-    order.addService(null, s.title().strip(), s.description(), s.laborPrice());
+    order.addService(null, s.title().strip(), s.description(),
+        s.laborPrice() != null ? s.laborPrice() : BigDecimal.ZERO);
   }
 
   /** Confere o saldo ANTES de concluir: a baixa assíncrona não deve falhar por falta de peça. */

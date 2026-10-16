@@ -86,10 +86,10 @@ class PrivacyAndSecurityTest {
     mvc.perform(auth(post("/service-orders/" + order + "/status"), admin)
         .content("{\"status\":\"orcamento\"}"));
     mvc.perform(auth(post("/service-orders/" + order + "/quote/send"), admin));
-    // Mensagem de orçamento (balcão) + OS aberta e código (API do WhatsApp, desligada no teste)
+    // Mensagem de orçamento (balcão) + OS aberta (API do WhatsApp, desligada no teste)
     await().atMost(Duration.ofSeconds(10)).untilAsserted(() ->
         mvc.perform(auth(get("/notifications?channel=whatsapp"), admin))
-            .andExpect(jsonPath("$.totalElements").value(3)));
+            .andExpect(jsonPath("$.totalElements").value(2)));
 
     mvc.perform(auth(post("/customers/" + customer + "/anonymize"), admin))
         .andExpect(status().isNoContent());

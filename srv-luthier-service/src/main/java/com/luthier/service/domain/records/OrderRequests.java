@@ -29,12 +29,21 @@ public final class OrderRequests {
       LocalDate estimatedDeliveryDate,
       @Size(max = 30) List<@Valid AddService> services) {}
 
-  /** Com catalogId, título e preço vêm do catálogo (laborPrice pode sobrescrever o preço). */
+  /**
+   * Com catalogId, título e preço vêm do catálogo (laborPrice pode sobrescrever o preço). Sem
+   * catálogo, laborPrice vazio = "a definir no diagnóstico" (R$ 0 até o luthier informar).
+   */
   public record AddService(
       UUID catalogId,
       @Size(max = 120) String title,
       @Size(max = 1000) String description,
       @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal laborPrice) {}
+
+  /** Diagnóstico: o luthier/dono define o valor (e pode ajustar título/descrição). */
+  public record UpdateService(
+      @Size(max = 120) String title,
+      @Size(max = 1000) String description,
+      @NotNull @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal laborPrice) {}
 
   public record AddPart(@NotNull UUID productId, @NotNull @Positive Integer quantity) {}
 

@@ -27,8 +27,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Área do cliente: OS aberta → WhatsApp automático com link + código amigável (XXXX-XXXX) →
- * cliente entra só com o código e vê apenas as próprias OS.
+ * Área do cliente: OS aberta → WhatsApp com o link de acompanhamento; cliente aprova o orçamento
+ * pelo link → recebe o código amigável (XXXX-XXXX) → entra só com o código e vê apenas as
+ * próprias OS.
  */
 @SpringBootTest(properties = "app.security.rate-limit.login.capacity=1000")
 @AutoConfigureMockMvc
@@ -77,14 +78,18 @@ class CustomerAreaTest {
   }
 
   @Test
-  void openingAnOrderSendsLinkAndCodeAndCustomerSeesOnlyOwnOrders() throws Exception {
-    // WhatsApp automático: mensagem de OS aberta (com o link) + código amigável
+  void approvingTheQuoteByLinkSendsTheCodeAndCustomerSeesOnlyOwnOrders() throws Exception {
+    // OS aberta: WhatsApp com o link de acompanhamento, ainda sem código
+    var opened = await().atMost(Duration.ofSeconds(10)).until(() -> FakeWhatsApp.SENT.stream()
+        .filter(s -> s.phone().equals(phone) && s.template().equals("luthieria_os_aberta"))
+        .findFirst().orElse(null), o -> o != null);
+    assertThat(opened.params().get(3)).contains("/acompanhar/");
+    assertThat(lastCode()).isNull();
+
+    // Cliente aprova o orçamento pelo link → recebe o código de acesso
+    approveByLink(orderId);
     var code = awaitCode(null);
     assertThat(code).matches("[2-9A-HJKMNP-TV-Z]{4}-[2-9A-HJKMNP-TV-Z]{4}");
-    var opened = FakeWhatsApp.SENT.stream()
-        .filter(s -> s.phone().equals(phone) && s.template().equals("luthieria_os_aberta"))
-        .findFirst().orElseThrow();
-    assertThat(opened.params().get(3)).endsWith("/cliente");
 
     // Histórico da oficina não guarda o código
     mvc.perform(auth(get("/notifications?channel=whatsapp"), admin))
@@ -98,12 +103,13 @@ class CustomerAreaTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(1))
         .andExpect(jsonPath("$[0].id").value(orderId))
+        .andExpect(jsonPath("$[0].status").value("em_execucao"))
         .andExpect(jsonPath("$[0].instrument").value("Fender Strat"));
 
-    // Aprova o orçamento pelo app
-    mvc.perform(auth(post("/service-orders/" + orderId + "/status"), admin).content("{\"status\":\"orcamento\"}"));
-    mvc.perform(auth(post("/service-orders/" + orderId + "/quote/send"), admin));
-    mvc.perform(auth(post("/client/orders/" + orderId + "/quote/approve"), client))
+    // Segunda OS: o cliente já logado aprova pelo app
+    var second = openOrder(instrumentId);
+    sendQuote(second);
+    mvc.perform(auth(post("/client/orders/" + second + "/quote/approve"), client))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("em_execucao"));
 
@@ -118,13 +124,14 @@ class CustomerAreaTest {
   }
 
   @Test
-  void newOrderOrDeskResendRotatesTheCode() throws Exception {
+  void newApprovalOrDeskResendRotatesTheCode() throws Exception {
+    approveByLink(orderId);
     var first = awaitCode(null);
     loginExpecting("ZZZZ-ZZZZ".equals(first) ? "YYYY-YYYY" : "ZZZZ-ZZZZ", 401);
     loginExpecting("abc", 401);
 
-    // Nova OS → novo código; o anterior deixa de valer
-    openOrder(instrumentId);
+    // Outra OS aprovada pelo link → novo código; o anterior deixa de valer
+    approveByLink(openOrder(instrumentId));
     var second = awaitCode(first);
     loginExpecting(first, 401);
     var client = login(second);
@@ -152,6 +159,26 @@ class CustomerAreaTest {
     return api.create(admin, "/service-orders", """
         {"customerId":"%s","instrumentId":"%s","reportedIssue":"Trastejando",
          "services":[{"title":"Regulagem","laborPrice":180}]}""".formatted(customerId, instrument));
+  }
+
+  private String sendQuote(String order) throws Exception {
+    mvc.perform(auth(post("/service-orders/" + order + "/status"), admin)
+        .content("{\"status\":\"orcamento\"}")).andExpect(status().isOk());
+    var body = mvc.perform(auth(post("/service-orders/" + order + "/quote/send"), admin))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    return JsonPath.read(body, "$.clientTrackingToken");
+  }
+
+  /** Cliente aprova pelo link do WhatsApp (portal, sem login). */
+  private void approveByLink(String order) throws Exception {
+    mvc.perform(post("/portal/orders/" + sendQuote(order) + "/quote/approve"))
+        .andExpect(status().isOk());
+  }
+
+  private String lastCode() {
+    return FakeWhatsApp.SENT.stream()
+        .filter(s -> s.phone().equals(phone) && s.template().equals("luthieria_codigo_acesso"))
+        .reduce((a, b) -> b).map(Sent::button).orElse(null);
   }
 
   /** Último código enviado ao telefone, esperando até ser diferente de "previous". */
