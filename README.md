@@ -73,6 +73,21 @@ variável `accessCode` e rode a pasta 7. `baseUrl` padrão: `http://localhost:80
 
 Mesmo fluxo em curl (requer `jq`): `bash postman/fluxo-curl.sh` — no passo 7 ele pede o código do log.
 
+### Teste e2e local com o front-end
+
+O [srv-lutheria-front](https://github.com/o-FM/srv-lutheria-front) chama esta API direto do
+navegador: o CORS do perfil dev já libera `http://localhost:3000` e `:5173`. Com o backend no ar:
+
+```bash
+cd srv-lutheria-front
+npm install
+npm run seed:api   # oficina, usuários, estoque, clientes e OS pela própria API
+npm run dev:api    # front em http://localhost:3000 com VITE_API_URL=http://localhost:8080
+```
+
+Logins: `armando.luthier@oficina.com` (ou CPF `123.456.789-09`) / `Luthier@2026` e
+`mariana.balcao@oficina.com` / `Balcao@2026!`. Detalhes no README do front ("Teste e2e local").
+
 ## Documentação
 
 - [API, multi-tenancy e ciclo da OS](docs/api.md) · [OpenAPI](docs/openapi.json)
