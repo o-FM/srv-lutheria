@@ -37,6 +37,40 @@ mvn install -DskipTests && docker compose up --build
 Admin inicial em dev: `admin@luthieria.local` / `dev-admin-12345`. Novas luthierias:
 `POST /auth/register`.
 
+### Com o PostgreSQL local (perfil `local`)
+
+Perfil `local` = facilidades de dev (OpenAPI em `/v3/api-docs`, código do cliente no log, CORS do front) +
+PostgreSQL (`application-postgres.yaml`). Padrões: `localhost:5432/luthieria`, usuário
+`luthieria_app`, senha `TroqueEstaSenha` (os mesmos do `db/postgresql/01_create_database.sql`).
+
+```bash
+# Linux/macOS
+SPRING_PROFILES_ACTIVE=local DB_PASSWORD=suaSenha java -jar srv-luthier-app/target/srv-luthier-app-1.0.0-SNAPSHOT.jar
+# Windows (PowerShell)
+$env:SPRING_PROFILES_ACTIVE="local"; $env:DB_PASSWORD="suaSenha"; java -jar srv-luthier-app\target\srv-luthier-app-1.0.0-SNAPSHOT.jar
+# ou pelo Maven / IDE: -Dspring-boot.run.profiles=local  |  VM option -Dspring.profiles.active=local
+```
+
+| Variável | Padrão |
+|---|---|
+| `DB_URL` | `jdbc:postgresql://localhost:5432/luthieria` |
+| `DB_USERNAME` / `DB_PASSWORD` | `luthieria_app` / `TroqueEstaSenha` |
+| `DB_BASELINE_VERSION` | `4.4` — versão do `02_schema.sql` usado para criar as tabelas |
+
+Tabelas criadas pelos scripts: na primeira subida o Flyway registra o schema na versão
+`DB_BASELINE_VERSION` (log `Successfully baselined schema with version: 4.4`) e não recria nada.
+Banco vazio: o Flyway cria tudo. Se o Hibernate acusar coluna/tabela faltando, o script usado era de
+uma versão anterior: rode `99_drop_all.sql` + `02_schema.sql` atuais (ou apague tudo e deixe o
+Flyway criar).
+
+### Postman
+
+Importe `postman/srv-luthieria.postman_collection.json` (Import → arquivo) e rode na ordem, ou use
+o **Collection Runner**. O primeiro request cadastra uma luthieria nova (e-mail e CPF aleatórios),
+e tokens/IDs ficam salvos nas variáveis da coleção — dá para rodar quantas vezes quiser.
+Área do cliente: copie o código `XXXX-XXXX` do log da API (`[DEV] Código de acesso`) para a
+variável `accessCode` e rode a pasta 7. `baseUrl` padrão: `http://localhost:8080`.
+
 ## Documentação
 
 - [API, multi-tenancy e ciclo da OS](docs/api.md) · [OpenAPI](docs/openapi.json)

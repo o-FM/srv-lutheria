@@ -5,6 +5,9 @@ spring:
     name: srv-luthieria
   profiles:
     default: dev
+    # "local" = facilidades de dev (application-dev.yaml) + PostgreSQL local (application-postgres.yaml)
+    group:
+      local: dev,postgres
   threads:
     virtual:
       enabled: true

@@ -1,0 +1,17 @@
+# PostgreSQL local (desenvolvimento / testes no Postman). Ative com o perfil "local":
+#   SPRING_PROFILES_ACTIVE=local
+# Padrões batem com db/postgresql/01_create_database.sql; sobrescreva por variável de ambiente.
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/luthieria}
+    username: ${DB_USERNAME:luthieria_app}
+    password: ${DB_PASSWORD:TroqueEstaSenha}
+  h2:
+    console:
+      enabled: false
+  flyway:
+    # Tabelas criadas pelos scripts de db/postgresql (sem flyway_schema_history): o Flyway registra
+    # o schema como já estando na versão do 02_schema.sql e aplica só as migrations posteriores.
+    # Banco vazio: o Flyway cria tudo normalmente (o baseline não é usado).
+    baseline-on-migrate: true
+    baseline-version: ${DB_BASELINE_VERSION:4.4}
