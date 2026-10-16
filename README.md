@@ -37,6 +37,20 @@ mvn install -DskipTests && docker compose up --build
 Admin inicial em dev: `admin@luthieria.local` / `dev-admin-12345`. Novas luthierias:
 `POST /auth/register`.
 
+### Teste e2e local com o front-end
+
+O [srv-lutheria-front](https://github.com/o-FM/srv-lutheria-front) chama esta API direto do
+navegador (CORS do perfil dev já libera `http://localhost:3000` e `:5173`). Com o backend no ar:
+
+```bash
+cd srv-lutheria-front
+npm install
+npm run seed:api   # oficina, usuários (armando.luthier@ / mariana.balcao@), estoque, clientes e OS
+npm run dev:api    # front em http://localhost:3000 com VITE_API_URL=http://localhost:8080
+```
+
+Detalhes e limitações no README do front ("Integração com o backend").
+
 ## Documentação
 
 - [API, multi-tenancy e ciclo da OS](docs/api.md) · [OpenAPI](docs/openapi.json)
