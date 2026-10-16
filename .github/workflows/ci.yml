@@ -51,7 +51,7 @@ jobs:
       - uses: actions/checkout@v4
       # Varredura de vulnerabilidades em dependências e no Dockerfile (falha em HIGH/CRITICAL).
       - name: Trivy (dependências)
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scanners: vuln,secret,misconfig
