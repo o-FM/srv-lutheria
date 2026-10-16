@@ -28,7 +28,7 @@ public interface ServiceOrderService {
 
   @PreAuthorize(Access.CUSTOMER_DESK)
   PageResponse<OrderResponse> search(OrderStatus status, UUID customerId, Integer number,
-      Pageable pageable);
+      boolean full, Pageable pageable);
 
   @PreAuthorize(Access.CUSTOMER_DESK)
   OrderResponse get(UUID id);

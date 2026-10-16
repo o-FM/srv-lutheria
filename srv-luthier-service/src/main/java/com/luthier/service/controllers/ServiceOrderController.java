@@ -49,18 +49,19 @@ public class ServiceOrderController {
     return service.create(request, principal.getName());
   }
 
-  /** Lista/Kanban: ?status=em_execucao&customerId=...&number=1042 */
+  /** Lista/Kanban: ?status=em_execucao&customerId=...&number=1042; full=true traz itens e timeline. */
   @GetMapping
   public PageResponse<OrderResponse> search(
       @RequestParam(required = false) String status,
       @RequestParam(required = false) UUID customerId,
       @RequestParam(required = false) Integer number,
+      @RequestParam(defaultValue = "false") boolean full,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
     var pageable = PageRequest.of(Math.max(page, 0), Math.clamp(size, 1, MAX_PAGE_SIZE),
         Sort.by(Sort.Direction.DESC, "orderNumber"));
     var parsed = status == null || status.isBlank() ? null : OrderStatus.fromValue(status);
-    return service.search(parsed, customerId, number, pageable);
+    return service.search(parsed, customerId, number, full, pageable);
   }
 
   @GetMapping("/{id}")

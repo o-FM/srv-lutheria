@@ -85,9 +85,9 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
   @Override
   @Transactional(readOnly = true)
   public PageResponse<OrderResponse> search(OrderStatus status, UUID customerId, Integer number,
-      Pageable pageable) {
+      boolean full, Pageable pageable) {
     return PageResponse.of(orderRepository.search(status, customerId, number, pageable),
-        OrderResponse::summary);
+        full ? OrderResponse::from : OrderResponse::summary);
   }
 
   @Override

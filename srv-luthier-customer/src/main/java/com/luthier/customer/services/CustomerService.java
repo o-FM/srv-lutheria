@@ -40,6 +40,10 @@ public interface CustomerService {
   @PreAuthorize(Access.CUSTOMER_DESK)
   List<InstrumentResponse> listInstruments(UUID customerId);
 
+  /** Todos os instrumentos da luthieria (carga inicial do app, busca global). */
+  @PreAuthorize(Access.CUSTOMER_DESK)
+  PageResponse<InstrumentResponse> listAllInstruments(Pageable pageable);
+
   @PreAuthorize(Access.CUSTOMER_DESK)
   InstrumentResponse updateInstrument(UUID customerId, UUID instrumentId, InstrumentRequest request);
 }

@@ -138,6 +138,13 @@ public class CustomerServiceImpl implements CustomerService, CustomerQueries {
   }
 
   @Override
+  @Transactional(readOnly = true)
+  public PageResponse<InstrumentResponse> listAllInstruments(Pageable pageable) {
+    return PageResponse.of(instrumentRepository.findAllByOrderByCreatedAtDesc(pageable),
+        InstrumentResponse::from);
+  }
+
+  @Override
   public InstrumentResponse updateInstrument(UUID customerId, UUID instrumentId,
       InstrumentRequest request) {
     var instrument = instrumentRepository.findByIdAndCustomerId(instrumentId, customerId)

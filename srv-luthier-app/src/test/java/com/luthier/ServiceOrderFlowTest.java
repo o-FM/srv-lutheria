@@ -190,8 +190,12 @@ class ServiceOrderFlowTest {
     api.create(other, "/service-orders", """
         {"customerId":"%s","instrumentId":"%s","reportedIssue":"Chiado"}"""
         .formatted(otherCustomer, otherInstrument), "$.orderNumber");
-    mvc.perform(auth(get("/service-orders?number=1"), other))
-        .andExpect(jsonPath("$.totalElements").value(1));
+    mvc.perform(auth(get("/service-orders?number=1&full=true"), other))
+        .andExpect(jsonPath("$.totalElements").value(1))
+        .andExpect(jsonPath("$.content[0].timeline.length()").value(1));
+    mvc.perform(auth(get("/instruments"), other))
+        .andExpect(jsonPath("$.totalElements").value(1))
+        .andExpect(jsonPath("$.content[0].brand").value("Ibanez"));
 
     // Instrumento de outra luthieria não pode ser usado
     mvc.perform(auth(post("/service-orders"), other).content("""

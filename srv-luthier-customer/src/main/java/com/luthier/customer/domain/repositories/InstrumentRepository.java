@@ -13,4 +13,7 @@ public interface InstrumentRepository extends JpaRepository<InstrumentEntity, UU
   List<InstrumentEntity> findAllByCustomerIdOrderByCreatedAtDesc(UUID customerId);
 
   Optional<InstrumentEntity> findByIdAndCustomerId(UUID id, UUID customerId);
+
+  org.springframework.data.domain.Page<InstrumentEntity> findAllByOrderByCreatedAtDesc(
+      org.springframework.data.domain.Pageable pageable);
 }
