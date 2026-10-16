@@ -1,6 +1,7 @@
 # Ambiente local completo: PostgreSQL + aplicação (perfil prod) + Mailpit (e-mails),
 # Prometheus (métricas) e Jaeger (traces).
-#   mvn -B install -DskipTests && docker compose up --build
+#   docker compose up --build
+# Produção: deploy/docker-compose.prod.yml (ver deploy/README.md).
 services:
   postgres:
     image: postgres:17-alpine
