@@ -82,7 +82,7 @@ navegador: o CORS do perfil dev já libera `http://localhost:3000` e `:5173`. Co
 cd srv-lutheria-front
 npm install
 npm run seed:api   # oficina, usuários, estoque, clientes e OS pela própria API
-npm run dev:api    # front em http://localhost:3000 com VITE_API_URL=http://localhost:8080
+npm run dev        # front em http://localhost:3000 chamando http://localhost:8080
 ```
 
 Logins: `armando.luthier@oficina.com` (ou CPF `123.456.789-09`) / `Luthier@2026` e
