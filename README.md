@@ -41,6 +41,7 @@ Admin inicial em dev: `admin@luthieria.local` / `dev-admin-12345`. Novas luthier
 
 - [API, multi-tenancy e ciclo da OS](docs/api.md) · [OpenAPI](docs/openapi.json)
 - [Revisão de segurança e LGPD](docs/security-review.md)
+- [Scripts PostgreSQL (criação manual do banco)](db/postgresql/README.md)
 - [Testes de carga](load-tests/README.md)
 - Diagramas dos módulos: gerados em `srv-luthier-app/target/spring-modulith-docs` pelo `ModularityTest`
 
