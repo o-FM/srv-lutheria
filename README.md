@@ -81,11 +81,12 @@ navegador: o CORS do perfil dev já libera `http://localhost:3000` e `:5173`. Co
 ```bash
 cd srv-lutheria-front
 npm install
-echo "VITE_API_URL=http://localhost:8080" > .env.local
-npm run dev        # http://localhost:3000 (ou npm run dev:vite → :5173)
+npm run seed:api   # oficina, usuários, estoque, clientes e OS pela própria API
+npm run dev:api    # front em http://localhost:3000 com VITE_API_URL=http://localhost:8080
 ```
 
-Cadastre a luthieria pela tela de cadastro do front (ou `POST /auth/register`) e entre com o dono.
+Logins: `armando.luthier@oficina.com` (ou CPF `123.456.789-09`) / `Luthier@2026` e
+`mariana.balcao@oficina.com` / `Balcao@2026!`. Detalhes no README do front ("Teste e2e local").
 
 ## Documentação
 
