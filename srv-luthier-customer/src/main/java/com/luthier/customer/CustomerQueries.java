@@ -18,6 +18,19 @@ public interface CustomerQueries {
 
   long countActive();
 
+  /**
+   * LGPD (portabilidade/acesso): todos os dados pessoais do cliente, SEM máscara, para entrega
+   * ao próprio titular. Inclui clientes inativos.
+   */
+  Optional<CustomerExport> exportData(UUID customerId);
+
+  record CustomerExport(UUID id, String name, String phone, String email, String cpf,
+                        String address, String notes, boolean active,
+                        java.time.Instant createdAt, java.util.List<InstrumentExport> instruments) {}
+
+  record InstrumentExport(UUID id, String type, String brand, String model, String serialNumber,
+                          String year, String finishColor, String conditionNotes) {}
+
   record CustomerSummary(UUID id, String name, String phone, String email) {}
 
   record InstrumentSummary(UUID id, UUID customerId, String type, String brand, String model) {}

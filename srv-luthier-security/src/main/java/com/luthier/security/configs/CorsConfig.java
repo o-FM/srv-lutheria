@@ -17,7 +17,9 @@ public class CorsConfig {
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
     config.setExposedHeaders(List.of("Retry-After"));
-    config.setAllowCredentials(true);
+    // A API usa Bearer token no header, não cookies: sem credenciais cross-origin
+    config.setAllowCredentials(false);
+    config.setMaxAge(3600L);
 
     final var source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", config);

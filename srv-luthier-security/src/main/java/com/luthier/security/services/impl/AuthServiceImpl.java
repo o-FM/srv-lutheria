@@ -16,7 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
+import com.luthier.shared.audit.AuditEvent;
+import com.luthier.shared.validation.Masks;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -30,10 +34,12 @@ public class AuthServiceImpl implements AuthService {
   private final TenantRepository tenantRepository;
   private final TokenService tokenService;
   private final Duration refreshTtl;
+  private final ApplicationEventPublisher events;
 
   public AuthServiceImpl(AuthenticationManager authenticationManager, UserRepository userRepository,
       RefreshTokenRepository refreshTokenRepository, TenantRepository tenantRepository,
-      TokenService tokenService, SegurancaProperties props) {
+      TokenService tokenService, SegurancaProperties props, ApplicationEventPublisher events) {
+    this.events = events;
     this.authenticationManager = authenticationManager;
     this.userRepository = userRepository;
     this.refreshTokenRepository = refreshTokenRepository;
@@ -47,12 +53,22 @@ public class AuthServiceImpl implements AuthService {
   public TokenResponse login(LoginRequest request) {
     var email = request.email().strip();
 
-    authenticationManager.authenticate(
-        UsernamePasswordAuthenticationToken.unauthenticated(email, request.password())
-    );
+    try {
+      authenticationManager.authenticate(
+          UsernamePasswordAuthenticationToken.unauthenticated(email, request.password())
+      );
+    } catch (AuthenticationException e) {
+      var tenantId = userRepository.findByEmailIgnoreCase(email)
+          .map(UserEntity::getTenantId).orElse(null);
+      events.publishEvent(new AuditEvent(tenantId, "LOGIN_FAILED", "user", null,
+          Masks.email(email) + " · " + e.getClass().getSimpleName()));
+      throw e;
+    }
 
     var user = userRepository.findByEmailIgnoreCase(email)
         .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
+    events.publishEvent(new AuditEvent(user.getTenantId(), "LOGIN_SUCCESS", "user",
+        user.getUuid().toString(), null));
 
     return issue(user, UUID.randomUUID());
   }

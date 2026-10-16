@@ -11,6 +11,7 @@ import com.luthier.security.domain.repositories.PasswordResetTokenRepository;
 import com.luthier.security.domain.repositories.RefreshTokenRepository;
 import com.luthier.security.domain.repositories.UserRepository;
 import com.luthier.security.services.PasswordRecoveryService;
+import com.luthier.shared.audit.AuditEvent;
 import jakarta.transaction.Transactional;
 import java.time.Duration;
 import java.time.Instant;
@@ -92,5 +93,7 @@ public class PasswordRecoveryServiceImpl implements PasswordRecoveryService {
 
     // Quem roubou a senha antiga não pode continuar logado com um refresh token antigo
     refreshTokenRepository.revokeAllByUser(user.getUuid(), now);
+    events.publishEvent(new AuditEvent(user.getTenantId(), "PASSWORD_RESET", "user",
+        user.getUuid().toString(), null));
   }
 }

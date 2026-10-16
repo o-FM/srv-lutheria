@@ -33,8 +33,9 @@ public class Notifier {
   /** Falha de envio não propaga: fica registrada como "falhou" para reenvio/consulta. */
   @Transactional
   public NotificationEntity email(String to, String subject, String body, String relatedType,
-      UUID relatedId) {
-    var n = NotificationEntity.of(Channel.EMAIL, to, subject, body, null, relatedType, relatedId);
+      UUID relatedId, UUID customerId) {
+    var n = NotificationEntity.of(Channel.EMAIL, to, subject, body, null, relatedType, relatedId)
+        .forCustomer(customerId);
     try {
       if (emailSender.send(to, subject, body)) {
         n.markSent();
@@ -51,11 +52,11 @@ public class Notifier {
   /** Gera a mensagem pronta e o link wa.me; o balcão envia em 1 toque e marca como enviada. */
   @Transactional
   public NotificationEntity whatsapp(String phoneDigits, String subject, String text,
-      String relatedType, UUID relatedId) {
+      String relatedType, UUID relatedId, UUID customerId) {
     var url = "https://wa.me/55" + phoneDigits + "?text="
         + URLEncoder.encode(text, StandardCharsets.UTF_8).replace("+", "%20");
     return save(NotificationEntity.of(Channel.WHATSAPP, phoneDigits, subject, text, url,
-        relatedType, relatedId));
+        relatedType, relatedId).forCustomer(customerId));
   }
 
   @Transactional

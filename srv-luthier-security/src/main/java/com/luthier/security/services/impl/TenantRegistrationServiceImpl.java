@@ -11,6 +11,7 @@ import com.luthier.security.domain.repositories.UserRepository;
 import com.luthier.shared.errors.ConflictException;
 import com.luthier.security.services.AuthService;
 import com.luthier.security.services.TenantRegistrationService;
+import com.luthier.shared.audit.AuditEvent;
 import com.luthier.shared.validation.Cpf;
 import com.luthier.shared.validation.Phone;
 import java.text.Normalizer;
@@ -67,6 +68,9 @@ public class TenantRegistrationServiceImpl implements TenantRegistrationService 
     events.publishEvent(
         new TenantRegistered(tenant.getId(), tenant.getName(), user.getUuid(), user.getName(),
             user.getEmail()));
+
+    events.publishEvent(new AuditEvent(tenant.getId(), "TENANT_REGISTERED", "tenant",
+        tenant.getId().toString(), tenant.getSlug()));
 
     return authService.startSession(user);
   }

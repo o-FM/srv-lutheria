@@ -14,6 +14,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface NotificationRepository extends JpaRepository<NotificationEntity, UUID> {
 
+  java.util.List<NotificationEntity> findAllByCustomerId(UUID customerId);
+
+  /** Retenção: roda sem tenant (job de plataforma), apaga de todas as luthierias. */
+  @org.springframework.data.jpa.repository.Modifying
+  @Query("delete from NotificationEntity n where n.createdAt < :cutoff")
+  int deleteOlderThan(@Param("cutoff") java.time.Instant cutoff);
+
   @Query("""
       select n from NotificationEntity n
       where (:channel is null or n.channel = :channel)

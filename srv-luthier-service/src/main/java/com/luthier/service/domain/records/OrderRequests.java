@@ -27,7 +27,7 @@ public final class OrderRequests {
       Priority priority,
       @NotBlank @Size(max = 2000) String reportedIssue,
       LocalDate estimatedDeliveryDate,
-      @Valid @Size(max = 30) List<AddService> services) {}
+      @Size(max = 30) List<@Valid AddService> services) {}
 
   /** Com catalogId, título e preço vêm do catálogo (laborPrice pode sobrescrever o preço). */
   public record AddService(

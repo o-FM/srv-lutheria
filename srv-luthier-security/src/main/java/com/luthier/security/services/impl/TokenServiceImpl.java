@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TokenServiceImpl implements TokenService {
 
-  private static final String ISSUER = "luthieria";
+  public static final String ISSUER = "luthieria";
 
   private final JwtEncoder jwtEncoder;
   private final long expirationInMinutes;

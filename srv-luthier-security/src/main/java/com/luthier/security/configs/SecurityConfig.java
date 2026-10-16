@@ -68,6 +68,10 @@ public class SecurityConfig {
             // Probes e métricas: em produção ficam na porta de management (rede interna)
             .requestMatchers("/actuator/health/**", "/actuator/info", "/actuator/prometheus")
             .permitAll()
+            // Demais endpoints de operação não são da conta de nenhuma luthieria
+            .requestMatchers("/actuator/**").denyAll()
+            // Contrato OpenAPI: só existe quando springdoc.api-docs.enabled=true (dev)
+            .requestMatchers("/v3/api-docs/**").permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth -> oauth

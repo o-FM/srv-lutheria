@@ -37,12 +37,15 @@ luthieria:
     email: ${ADMIN_EMAIL:admin@luthieria.local}
     senha: ${ADMIN_SENHA}
   frontend-url: ${FRONTEND_URL:https://app.luthieria.com.br}
+  retention:
+    notification-days: ${RETENTION_NOTIFICATION_DAYS:365}
+    audit-days: ${RETENTION_AUDIT_DAYS:1825}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus,metrics,modulith
+        include: health,info,prometheus
   endpoint:
     health:
       probes:
@@ -51,6 +54,11 @@ management:
   tracing:
     sampling:
       probability: ${TRACING_SAMPLING:0.1}
+  # Métricas saem pelo /actuator/prometheus (pull). Push OTLP só se houver coletor configurado.
+  otlp:
+    metrics:
+      export:
+        enabled: ${OTLP_METRICS_ENABLED:false}
   observations:
     key-values:
       application: srv-luthieria

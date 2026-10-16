@@ -9,6 +9,7 @@ import com.luthier.security.domain.repositories.UserRepository;
 import com.luthier.shared.errors.ConflictException;
 import com.luthier.shared.errors.NotFoundException;
 import com.luthier.security.services.UserManagementService;
+import com.luthier.shared.audit.AuditEvent;
 import com.luthier.shared.tenancy.TenantContext;
 import com.luthier.shared.validation.Cpf;
 import com.luthier.shared.validation.Phone;
@@ -17,6 +18,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +29,15 @@ public class UserManagementServiceImpl implements UserManagementService {
   private final UserRepository userRepository;
   private final RefreshTokenRepository refreshTokenRepository;
   private final PasswordEncoder passwordEncoder;
+  private final ApplicationEventPublisher events;
 
   public UserManagementServiceImpl(UserRepository userRepository,
-      RefreshTokenRepository refreshTokenRepository, PasswordEncoder passwordEncoder) {
+      RefreshTokenRepository refreshTokenRepository, PasswordEncoder passwordEncoder,
+      ApplicationEventPublisher events) {
     this.userRepository = userRepository;
     this.refreshTokenRepository = refreshTokenRepository;
     this.passwordEncoder = passwordEncoder;
+    this.events = events;
   }
 
   @Override
@@ -57,6 +62,8 @@ public class UserManagementServiceImpl implements UserManagementService {
         passwordEncoder.encode(request.password()),
         request.profile()));
 
+    events.publishEvent(AuditEvent.of("USER_CREATED", "user", user.getUuid(),
+        "perfil " + user.getProfile().getValue()));
     return UserResponse.from(user);
   }
 
@@ -79,6 +86,8 @@ public class UserManagementServiceImpl implements UserManagementService {
     // O JWT atual (até 15 min) ainda carrega o papel antigo; revogar força um refresh e o novo
     // access token já sai com o papel atualizado.
     refreshTokenRepository.revokeAllByUser(user.getUuid(), Instant.now());
+    events.publishEvent(AuditEvent.of("USER_PROFILE_CHANGED", "user", id,
+        "novo perfil " + profile.getValue()));
     return UserResponse.from(user);
   }
 
@@ -86,6 +95,7 @@ public class UserManagementServiceImpl implements UserManagementService {
   public UserResponse activate(UUID id) {
     var user = find(id);
     user.activate();
+    events.publishEvent(AuditEvent.of("USER_ACTIVATED", "user", id, null));
     return UserResponse.from(user);
   }
 
@@ -95,6 +105,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     user.deactivate();
     // Usuário desativado não pode mais renovar sessão (o JWT em mãos expira em no máx. 15 min).
     refreshTokenRepository.revokeAllByUser(user.getUuid(), Instant.now());
+    events.publishEvent(AuditEvent.of("USER_DEACTIVATED", "user", id, null));
     return UserResponse.from(user);
   }
 

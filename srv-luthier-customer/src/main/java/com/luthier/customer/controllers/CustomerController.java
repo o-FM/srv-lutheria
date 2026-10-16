@@ -71,6 +71,13 @@ public class CustomerController {
     customerService.deactivate(id);
   }
 
+  /** LGPD: eliminação dos dados pessoais (mantém o histórico de OS sem identificar a pessoa). */
+  @PostMapping("/{id}/anonymize")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void anonymize(@PathVariable UUID id) {
+    customerService.anonymize(id);
+  }
+
   @PostMapping("/{id}/instruments")
   @ResponseStatus(HttpStatus.CREATED)
   public InstrumentResponse addInstrument(@PathVariable UUID id,

@@ -57,6 +57,10 @@ public class NotificationEntity extends TenantScopedEntity {
   @Column(name = "related_id")
   private UUID relatedId;
 
+  /** Cliente destinatário, para atender pedidos de eliminação de dados (LGPD). */
+  @Column(name = "customer_id")
+  private UUID customerId;
+
   @Column(length = 500)
   private String error;
 
@@ -79,6 +83,18 @@ public class NotificationEntity extends TenantScopedEntity {
     return n;
   }
 
+  public NotificationEntity forCustomer(UUID customerId) {
+    this.customerId = customerId;
+    return this;
+  }
+
+  /** LGPD: remove destinatário e conteúdo (que cita o nome); mantém só o fato de ter havido envio. */
+  public void scrub() {
+    this.recipient = null;
+    this.body = "[conteúdo removido a pedido do titular]";
+    this.actionUrl = null;
+  }
+
   public void markSent() {
     this.status = DeliveryStatus.SENT;
     this.sentAt = Instant.now();
@@ -99,6 +115,7 @@ public class NotificationEntity extends TenantScopedEntity {
   public String getActionUrl() { return actionUrl; }
   public String getRelatedType() { return relatedType; }
   public UUID getRelatedId() { return relatedId; }
+  public UUID getCustomerId() { return customerId; }
   public String getError() { return error; }
   public Instant getSentAt() { return sentAt; }
 }

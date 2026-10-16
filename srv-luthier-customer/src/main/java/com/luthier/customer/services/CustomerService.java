@@ -30,6 +30,10 @@ public interface CustomerService {
   @PreAuthorize(Access.ADMIN)
   void deactivate(UUID id);
 
+  /** LGPD: eliminação dos dados pessoais a pedido do titular. Irreversível. */
+  @PreAuthorize(Access.ADMIN)
+  void anonymize(UUID id);
+
   @PreAuthorize(Access.CUSTOMER_DESK)
   InstrumentResponse addInstrument(UUID customerId, InstrumentRequest request);
 

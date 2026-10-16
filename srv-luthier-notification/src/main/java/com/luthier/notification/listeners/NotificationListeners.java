@@ -1,6 +1,9 @@
 package com.luthier.notification.listeners;
 
+import com.luthier.customer.CustomerAnonymized;
 import com.luthier.customer.CustomerQueries;
+import com.luthier.notification.domain.entities.NotificationEntity;
+import com.luthier.notification.domain.repositories.NotificationRepository;
 import com.luthier.notification.services.EmailSender;
 import com.luthier.notification.services.impl.Notifier;
 import com.luthier.product.StockLow;
@@ -55,6 +58,12 @@ public class NotificationListeners {
 
   @Async
   @TransactionalEventListener
+  public void on(CustomerAnonymized event) {
+    TenantContext.runAs(event.tenantId(), () -> handlers.scrubCustomer(event));
+  }
+
+  @Async
+  @TransactionalEventListener
   public void on(StockLow event) {
     TenantContext.runAs(event.tenantId(), () -> handlers.stockLow(event));
   }
@@ -89,11 +98,13 @@ public class NotificationListeners {
 
     private final Notifier notifier;
     private final CustomerQueries customers;
+    private final NotificationRepository repository;
     private final String frontendUrl;
 
-    Handlers(Notifier notifier, CustomerQueries customers,
+    Handlers(Notifier notifier, CustomerQueries customers, NotificationRepository repository,
         @Value("${luthieria.frontend-url}") String frontendUrl) {
       this.notifier = notifier;
+      this.repository = repository;
       this.customers = customers;
       this.frontendUrl = frontendUrl;
     }
@@ -113,10 +124,12 @@ public class NotificationListeners {
       var subject = "OS #" + e.orderNumber() + " · " + subjectFor(e.to());
 
       if (customer.email() != null) {
-        notifier.email(customer.email(), subject, text, "service_order", e.orderId());
+        notifier.email(customer.email(), subject, text, "service_order", e.orderId(),
+            e.customerId());
       }
       if (customer.phone() != null) {
-        notifier.whatsapp(customer.phone(), subject, text, "service_order", e.orderId());
+        notifier.whatsapp(customer.phone(), subject, text, "service_order", e.orderId(),
+            e.customerId());
       }
     }
 
@@ -127,7 +140,13 @@ public class NotificationListeners {
 
           A oficina "%s" foi cadastrada com sucesso. Acesse %s para cadastrar clientes,
           instrumentos, estoque e abrir a primeira ordem de serviço.
-          """.formatted(e.ownerName(), e.tenantName(), frontendUrl), "tenant", e.tenantId());
+          """.formatted(e.ownerName(), e.tenantName(), frontendUrl), "tenant", e.tenantId(),
+          null);
+    }
+
+    @Transactional
+    public void scrubCustomer(CustomerAnonymized e) {
+      repository.findAllByCustomerId(e.customerId()).forEach(NotificationEntity::scrub);
     }
 
     @Transactional
