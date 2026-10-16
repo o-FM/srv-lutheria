@@ -1,5 +1,5 @@
 # Build: mvn -B install -DskipTests && docker build -t srv-luthieria .
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 RUN addgroup -S app && adduser -S app -G app
 USER app
