@@ -56,6 +56,16 @@ public class UserEntity {
   @Column(nullable = false)
   private boolean active = true;
 
+  /** Preferências de aparência (por usuário, não por aparelho). */
+  @Column(name = "theme_mode", length = 10)
+  private String themeMode;
+
+  @Column(name = "theme_accent", length = 15)
+  private String themeAccent;
+
+  @Column(name = "theme_tone", length = 10)
+  private String themeTone;
+
   protected UserEntity() {}
 
   public UUID getUuid() { return uuid; }
@@ -67,6 +77,16 @@ public class UserEntity {
   public String getPassword() { return password; }
   public Profile getProfile() { return profile; }
   public boolean isActive() { return active; }
+
+  public String getThemeMode() { return themeMode; }
+  public String getThemeAccent() { return themeAccent; }
+  public String getThemeTone() { return themeTone; }
+
+  public void changeAppearance(String mode, String accent, String tone) {
+    this.themeMode = mode;
+    this.themeAccent = accent;
+    this.themeTone = tone;
+  }
 
   public boolean belongsTo(UUID tenantId) { return this.tenantId.equals(tenantId); }
 

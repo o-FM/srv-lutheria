@@ -1,7 +1,7 @@
 -- =============================================================================
 -- srv-luthieria · PostgreSQL 15+ · 02 — tabelas, índices e restrições
 --
--- Consolidação das migrations Flyway V1.0 a V4.1 (uma por módulo, em
+-- Consolidação das migrations Flyway V1.0 a V4.2 (uma por módulo, em
 -- srv-luthier-*/src/main/resources/db/migration). Executar conectado ao banco da aplicação:
 --   psql -h <host> -U luthieria_app -d luthieria -f 02_schema.sql
 --
@@ -10,8 +10,8 @@
 --
 -- IMPORTANTE: a aplicação já cria este schema sozinha via Flyway. Use este script só se o banco
 -- for criado manualmente (DBA); depois suba a aplicação com
---   SPRING_FLYWAY_BASELINE_ON_MIGRATE=true  SPRING_FLYWAY_BASELINE_VERSION=4.1
--- para o Flyway registrar que o schema já está na versão 4.1 (ver README.md desta pasta).
+--   SPRING_FLYWAY_BASELINE_ON_MIGRATE=true  SPRING_FLYWAY_BASELINE_VERSION=4.2
+-- para o Flyway registrar que o schema já está na versão 4.2 (ver README.md desta pasta).
 -- =============================================================================
 
 BEGIN;
@@ -41,6 +41,9 @@ CREATE TABLE user_tb (
     password_hash  varchar(255) NOT NULL,
     profile        varchar(20)  NOT NULL,
     active         boolean      NOT NULL,
+    theme_mode     varchar(10),
+    theme_accent   varchar(15),
+    theme_tone     varchar(10),
     CONSTRAINT uk_user_email UNIQUE (email),
     CONSTRAINT uk_user_tenant_cpf UNIQUE (tenant_id, cpf),
     CONSTRAINT fk_user_tenant FOREIGN KEY (tenant_id) REFERENCES tenant_tb (id),
@@ -48,6 +51,7 @@ CREATE TABLE user_tb (
 );
 CREATE INDEX idx_user_tenant ON user_tb (tenant_id);
 COMMENT ON TABLE user_tb IS 'Usuários internos. E-mail único na plataforma (login); senha em Argon2id.';
+COMMENT ON COLUMN user_tb.theme_accent IS 'Preferência de aparência do usuário (modo, cor de destaque e tom).';
 
 CREATE TABLE refresh_token_tb (
     id          uuid        NOT NULL PRIMARY KEY,

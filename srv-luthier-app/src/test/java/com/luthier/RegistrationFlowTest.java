@@ -3,6 +3,7 @@ package com.luthier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -146,6 +147,39 @@ class RegistrationFlowTest {
             {"name":"x","category":"pecas","sku":"X1","unit":"un","costPrice":1,"salePrice":2,
              "minQuantity":0}"""))
         .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void eachUserKeepsOwnAppearancePreferences() throws Exception {
+    var email = "cores-" + System.nanoTime() + "@teste.com";
+    mvc.perform(auth(post("/users"), tokenA).content("""
+            {"name":"Mariana","email":"%s","password":"Balcao@2026xx","profile":"ATENDENTE"}"""
+            .formatted(email)))
+        .andExpect(status().isCreated());
+    var login = mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
+            .content("{\"email\":\"%s\",\"password\":\"Balcao@2026xx\"}".formatted(email)))
+        .andReturn().getResponse().getContentAsString();
+    String attendant = JsonPath.read(login, "$.accessToken");
+
+    mvc.perform(auth(put("/users/me/preferences"), attendant)
+            .content("{\"themeMode\":\"light\",\"themeAccent\":\"violeta\",\"themeTone\":\"ardosia\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.preferences.themeAccent").value("violeta"));
+    mvc.perform(auth(put("/users/me/preferences"), tokenA)
+            .content("{\"themeMode\":\"dark\",\"themeAccent\":\"azul\",\"themeTone\":\"quente\"}"))
+        .andExpect(status().isOk());
+
+    // Cada um vê a própria escolha
+    mvc.perform(auth(get("/users/me"), attendant))
+        .andExpect(jsonPath("$.preferences.themeMode").value("light"))
+        .andExpect(jsonPath("$.preferences.themeAccent").value("violeta"));
+    mvc.perform(auth(get("/users/me"), tokenA))
+        .andExpect(jsonPath("$.preferences.themeAccent").value("azul"));
+
+    // Só valores do catálogo de cores
+    mvc.perform(auth(put("/users/me/preferences"), attendant)
+            .content("{\"themeAccent\":\"#ff0000\"}"))
+        .andExpect(status().isBadRequest());
   }
 
   @Test

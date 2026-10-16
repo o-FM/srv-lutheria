@@ -7,10 +7,12 @@ import java.util.UUID;
 
 /** CPF sempre mascarado (LGPD). */
 public record UserResponse(UUID id, UUID tenantId, String name, String email, String maskedCpf,
-                           String phone, Profile profile, boolean active) {
+                           String phone, Profile profile, boolean active,
+                           UserPreferences preferences) {
 
   public static UserResponse from(UserEntity user) {
     return new UserResponse(user.getUuid(), user.getTenantId(), user.getName(), user.getEmail(),
-        Cpf.mask(user.getCpf()), user.getPhone(), user.getProfile(), user.isActive());
+        Cpf.mask(user.getCpf()), user.getPhone(), user.getProfile(), user.isActive(),
+        new UserPreferences(user.getThemeMode(), user.getThemeAccent(), user.getThemeTone()));
   }
 }

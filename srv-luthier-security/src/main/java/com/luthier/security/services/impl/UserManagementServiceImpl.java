@@ -3,6 +3,7 @@ package com.luthier.security.services.impl;
 import com.luthier.security.domain.entities.UserEntity;
 import com.luthier.security.domain.enums.Profile;
 import com.luthier.security.domain.records.CreateUserRequest;
+import com.luthier.security.domain.records.UserPreferences;
 import com.luthier.security.domain.records.UserResponse;
 import com.luthier.security.domain.repositories.RefreshTokenRepository;
 import com.luthier.security.domain.repositories.UserRepository;
@@ -77,6 +78,14 @@ public class UserManagementServiceImpl implements UserManagementService {
   @Override
   public UserResponse me(UUID userId) {
     return UserResponse.from(find(userId));
+  }
+
+  @Override
+  public UserResponse updateMyPreferences(UUID userId, UserPreferences preferences) {
+    var user = find(userId);
+    user.changeAppearance(preferences.themeMode(), preferences.themeAccent(),
+        preferences.themeTone());
+    return UserResponse.from(user);
   }
 
   @Override
