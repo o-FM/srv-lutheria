@@ -9,6 +9,7 @@ import com.luthier.service.domain.records.OrderRequests.CreateOrder;
 import com.luthier.service.domain.records.OrderRequests.ReceivePayment;
 import com.luthier.service.domain.records.OrderRequests.RejectQuote;
 import com.luthier.service.domain.records.OrderRequests.UpdateOrder;
+import com.luthier.service.domain.records.OrderRequests.UpdateService;
 import com.luthier.service.domain.records.OrderResponse;
 import com.luthier.service.services.ServiceOrderService;
 import com.luthier.shared.web.PageResponse;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -83,6 +85,12 @@ public class ServiceOrderController {
   @DeleteMapping("/{id}/services/{itemId}")
   public OrderResponse removeService(@PathVariable UUID id, @PathVariable UUID itemId) {
     return service.removeService(id, itemId);
+  }
+
+  @PutMapping("/{id}/services/{itemId}")
+  public OrderResponse updateService(@PathVariable UUID id, @PathVariable UUID itemId,
+      @Valid @RequestBody UpdateService request, Principal principal) {
+    return service.updateService(id, itemId, request, principal.getName());
   }
 
   @PostMapping("/{id}/services/{itemId}/done")

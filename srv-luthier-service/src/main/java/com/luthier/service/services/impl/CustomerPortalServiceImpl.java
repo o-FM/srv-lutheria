@@ -96,6 +96,8 @@ public class CustomerPortalServiceImpl implements CustomerPortalService {
       order.approveQuote(CUSTOMER);
       repository.saveAndFlush(order);
       publish(order, previous.getValue());
+      events.publishEvent(new com.luthier.service.QuoteApprovedByCustomer(TenantContext.require(),
+          order.getId(), order.getOrderNumber(), order.getCustomerId()));
       return toResponse(order);
     }
 

@@ -163,6 +163,19 @@ public class ServiceOrderEntity extends TenantScopedEntity {
     }
   }
 
+  public void updateService(UUID itemId, String title, String description, BigDecimal laborPrice,
+      String user) {
+    requireEditable();
+    var item = services.stream().filter(s -> itemId.equals(s.getId())).findFirst()
+        .orElseThrow(() -> new NotFoundException("Service item not found!"));
+    var before = item.getLaborPrice();
+    item.update(title, description, laborPrice);
+    if (before.compareTo(laborPrice) != 0) {
+      log(TimelineType.NOTE_ADDED, "Valor do serviço: " + item.getTitle(),
+          "R$ " + before + " → R$ " + laborPrice, user);
+    }
+  }
+
   public void markServiceDone(UUID itemId, String user) {
     if (status != OrderStatus.EM_EXECUCAO) {
       throw new ConflictException("Serviços só podem ser concluídos com a OS em execução");
@@ -241,6 +254,9 @@ public class ServiceOrderEntity extends TenantScopedEntity {
   public void sendQuote(String user) {
     if (services.isEmpty() && parts.isEmpty()) {
       throw new BadRequestException("Orçamento sem serviços ou peças");
+    }
+    if (services.stream().anyMatch(s -> s.getLaborPrice().signum() == 0)) {
+      throw new BadRequestException("Informe o valor de todos os serviços antes de enviar o orçamento");
     }
     transition(OrderStatus.AGUARDANDO_APROVACAO);
     quoteStatus = QuoteStatus.PENDENTE;

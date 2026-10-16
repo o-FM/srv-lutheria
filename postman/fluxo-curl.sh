@@ -163,7 +163,7 @@ curl -s "$BASE/service-catalog" -H "Authorization: Bearer $TOKEN" | jq '[.[] | {
 
 # ---------------------------------------------------------------- 6. Ordem de serviço
 passo "6.1 Abrir OS"
-ORDER_ID=$(curl -s -X POST "$BASE/service-orders" \
+RESP=$(curl -s -X POST "$BASE/service-orders" \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
   -d '{
     "customerId": "'"$CUSTOMER_ID"'",
@@ -172,8 +172,10 @@ ORDER_ID=$(curl -s -X POST "$BASE/service-orders" \
     "reportedIssue": "Trastejando na 5a casa",
     "estimatedDeliveryDate": "2030-01-10",
     "services": [{"catalogId": "'"$CATALOG_ID"'"}]
-  }' | jq -r .id)
-echo "ORDER_ID=$ORDER_ID"
+  }')
+ORDER_ID=$(echo "$RESP" | jq -r .id)
+SERVICE_ITEM_ID=$(echo "$RESP" | jq -r '.services[0].id')
+echo "ORDER_ID=$ORDER_ID  SERVICE_ITEM_ID=$SERVICE_ITEM_ID"
 
 passo "6.2 Detalhar OS"
 curl -s "$BASE/service-orders/$ORDER_ID" -H "Authorization: Bearer $TOKEN" \
@@ -189,7 +191,12 @@ curl -s -X POST "$BASE/service-orders/$ORDER_ID/status" \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
   -d '{"status": "orcamento"}' | jq '{status}'
 
-passo "6.5 Adicionar peça"
+passo "6.5 Definir valor do serviço no diagnóstico (só ADMIN/LUTHIER)"
+curl -s -X PUT "$BASE/service-orders/$ORDER_ID/services/$SERVICE_ITEM_ID" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"laborPrice": 200.00, "description": "Regulagem + limpeza do braço"}' | jq '{totalAmount}'
+
+passo "6.5b Adicionar peça"
 curl -s -X POST "$BASE/service-orders/$ORDER_ID/parts" \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
   -d '{"productId": "'"$PRODUCT_ID"'", "quantity": 1}' | jq '{totalAmount}'
@@ -202,7 +209,7 @@ echo "TRACKING=$TRACKING"
 passo "6.7 Portal: ver OS (sem login)"
 curl -s "$BASE/portal/orders/$TRACKING" | jq '{customerFirstName, instrument, status, total: .quote.grandTotal}'
 
-passo "6.8 Portal: aprovar orçamento (sem login)"
+passo "6.8 Portal: aprovar orçamento (sem login) — dispara o código de acesso do cliente"
 curl -s -X POST "$BASE/portal/orders/$TRACKING/quote/approve" | jq '{status}'
 
 passo "6.9 Status → pronto"
@@ -213,7 +220,7 @@ curl -s -X POST "$BASE/service-orders/$ORDER_ID/status" \
 passo "6.10 Registrar pagamento"
 curl -s -X POST "$BASE/service-orders/$ORDER_ID/payments" \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"amount": 225.00, "method": "pix"}' | jq '{balance}'
+  -d '{"amount": 245.00, "method": "pix"}' | jq '{balance}'
 
 passo "6.11 Status → entregue"
 curl -s -X POST "$BASE/service-orders/$ORDER_ID/status" \
@@ -225,28 +232,28 @@ curl -s "$BASE/service-orders?full=true" -H "Authorization: Bearer $TOKEN" \
   | jq '[.content[] | {orderNumber, status}]'
 
 # ---------------------------------------------------------------- 7. Área do cliente
-passo "7.1 Reenviar código de acesso (balcão) — o anterior deixa de valer"
-curl -s -X POST "$BASE/customers/$CUSTOMER_ID/access-code" \
-  -H "Authorization: Bearer $TOKEN" | jq '{status, body}'
-
 # O código não sai na API: vem pelo WhatsApp (em dev, no log: "[DEV] Código de acesso").
 CODE=${CODE:-}
 if [ -z "$CODE" ]; then
   read -r -p "Cole o código do log da API (XXXX-XXXX): " CODE
 fi
 
-passo "7.2 Login do cliente (só o código)"
+passo "7.1 Login do cliente (só o código)"
 CLIENT_TOKEN=$(curl -s -X POST "$BASE/auth/customer/login" \
   -H 'Content-Type: application/json' \
   -d '{"code": "'"$CODE"'"}' | jq -r .accessToken)
 echo "CLIENT_TOKEN: ${CLIENT_TOKEN:0:25}..."
 
-passo "7.3 Minhas OS (cliente)"
+passo "7.2 Minhas OS (cliente)"
 curl -s "$BASE/client/orders" -H "Authorization: Bearer $CLIENT_TOKEN" \
   | jq '[.[] | {orderNumber, instrument, status}]'
 
-passo "7.4 Cliente tentando rota do balcão (esperado 403)"
+passo "7.3 Cliente tentando rota do balcão (esperado 403)"
 curl -s -o /dev/null -w '%{http_code}\n' "$BASE/customers" -H "Authorization: Bearer $CLIENT_TOKEN"
+
+passo "7.4 Reenviar código de acesso (balcão) — o anterior deixa de valer"
+curl -s -X POST "$BASE/customers/$CUSTOMER_ID/access-code" \
+  -H "Authorization: Bearer $TOKEN" | jq '{status, body}'
 
 # ---------------------------------------------------------------- 8. Relatórios, mensagens e auditoria
 passo "8.1 Dashboard"

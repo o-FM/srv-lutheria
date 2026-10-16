@@ -5,6 +5,7 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -174,6 +175,58 @@ class ServiceOrderFlowTest {
     mvc.perform(auth(post("/products/" + productId + "/movements"), admin)
         .content("{\"type\":\"saida\",\"quantity\":2,\"reason\":\"venda balcão\"}"));
     moveTo(orderId, "pronto").andExpect(status().isConflict());
+  }
+
+  @Test
+  void benchSetsServicePriceDuringDiagnosis() throws Exception {
+    var luthier = api.createUser(admin, "LUTHIER");
+    var attendant = api.createUser(admin, "ATENDENTE");
+    // Balcão abre a OS com o serviço "a definir" (sem valor)
+    var body = mvc.perform(auth(post("/service-orders"), attendant).content("""
+            {"customerId":"%s","instrumentId":"%s","reportedIssue":"Trastes gastos",
+             "services":[{"title":"Troca de trastes"}]}""".formatted(customerId, instrumentId)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.services[0].laborPrice").value(0))
+        .andReturn().getResponse().getContentAsString();
+    String orderId = JsonPath.read(body, "$.id");
+    String itemId = JsonPath.read(body, "$.services[0].id");
+    moveTo(orderId, "diagnostico");
+    moveTo(orderId, "orcamento");
+
+    // Sem valor não envia orçamento
+    mvc.perform(auth(post("/service-orders/" + orderId + "/quote/send"), admin))
+        .andExpect(status().isBadRequest());
+
+    // Atendente não define valor; luthier define
+    mvc.perform(auth(put("/service-orders/" + orderId + "/services/" + itemId), attendant)
+            .content("{\"laborPrice\":650}"))
+        .andExpect(status().isForbidden());
+    mvc.perform(auth(put("/service-orders/" + orderId + "/services/" + itemId), luthier)
+            .content("{\"laborPrice\":650,\"description\":\"22 trastes jumbo\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.services[0].laborPrice").value(650))
+        .andExpect(jsonPath("$.services[0].description").value("22 trastes jumbo"))
+        .andExpect(jsonPath("$.totalAmount").value(650));
+
+    // Depois do envio o valor fica travado
+    mvc.perform(auth(post("/service-orders/" + orderId + "/quote/send"), admin))
+        .andExpect(status().isOk());
+    mvc.perform(auth(put("/service-orders/" + orderId + "/services/" + itemId), luthier)
+            .content("{\"laborPrice\":700}"))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
+  void onlyOwnerSeesRevenue() throws Exception {
+    var luthier = api.createUser(admin, "LUTHIER");
+    mvc.perform(auth(get("/reports/financial"), luthier)).andExpect(status().isForbidden());
+    mvc.perform(auth(get("/reports/dashboard"), luthier)).andExpect(status().isOk());
+    mvc.perform(auth(get("/reports/financial"), admin)).andExpect(status().isOk());
+    // Só o dono cadastra outros perfis
+    mvc.perform(auth(post("/users"), luthier).content("""
+            {"name":"X","email":"x-%d@teste.com","password":"SenhaForte@2026","profile":"ATENDENTE"}"""
+            .formatted(System.nanoTime())))
+        .andExpect(status().isForbidden());
   }
 
   @Test

@@ -824,7 +824,7 @@
                 }
               }
             },
-            "description": "Ao abrir a OS o cliente recebe pelo WhatsApp o link e o código de acesso. Sem WhatsApp configurado, o código aparece no log da API: procure por [DEV] Código de acesso."
+            "description": "Ao abrir a OS o cliente recebe pelo WhatsApp o link de acompanhamento. O código de acesso só é enviado quando ele aprova o orçamento por esse link."
           },
           "event": [
             {
@@ -833,7 +833,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
-                  "if (pm.response.code < 300) pm.collectionVariables.set('orderId', pm.response.json().id);"
+                  "if (pm.response.code < 300) pm.collectionVariables.set('orderId', pm.response.json().id);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('serviceItemId', pm.response.json().services[0].id);"
                 ]
               }
             }
@@ -940,6 +941,51 @@
                 }
               }
             }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Definir valor do serviço (diagnóstico)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/service-orders/{{orderId}}/services/{{serviceItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "service-orders",
+                "{{orderId}}",
+                "services",
+                "{{serviceItemId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"laborPrice\": 200.0,\n  \"description\": \"Regulagem + limpeza do braço\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Só ADMIN ou LUTHIER. Permitido até o envio do orçamento."
           },
           "event": [
             {
@@ -1077,6 +1123,7 @@
                 "approve"
               ]
             },
+            "description": "Aprovação pelo link do WhatsApp: dispara o código de acesso da área do cliente (em dev aparece no log: [DEV] Código de acesso).",
             "auth": {
               "type": "noauth"
             }
@@ -1159,14 +1206,14 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 225.00,\n  \"method\": \"pix\"\n}",
+              "raw": "{\n  \"amount\": 245.00,\n  \"method\": \"pix\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
-            "description": "method: pix, cartao_credito, cartao_debito, dinheiro, transferencia. Total da OS: 180 (serviço) + 45 (peça) = 225."
+            "description": "method: pix, cartao_credito, cartao_debito, dinheiro, transferencia. Total da OS: 200 (serviço) + 45 (peça) = 245."
           },
           "event": [
             {
@@ -1619,6 +1666,10 @@
     },
     {
       "key": "orderId",
+      "value": ""
+    },
+    {
+      "key": "serviceItemId",
       "value": ""
     },
     {

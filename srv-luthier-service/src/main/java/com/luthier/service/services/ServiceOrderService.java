@@ -9,6 +9,7 @@ import com.luthier.service.domain.records.OrderRequests.CreateOrder;
 import com.luthier.service.domain.records.OrderRequests.ReceivePayment;
 import com.luthier.service.domain.records.OrderRequests.RejectQuote;
 import com.luthier.service.domain.records.OrderRequests.UpdateOrder;
+import com.luthier.service.domain.records.OrderRequests.UpdateService;
 import com.luthier.service.domain.records.OrderResponse;
 import com.luthier.shared.authorization.Access;
 import com.luthier.shared.web.PageResponse;
@@ -41,6 +42,10 @@ public interface ServiceOrderService {
 
   @PreAuthorize(Access.CUSTOMER_DESK)
   OrderResponse removeService(UUID id, UUID itemId);
+
+  /** Valor do serviço: quem faz o diagnóstico (luthier ou dono). */
+  @PreAuthorize(Access.ADMIN_OR_LUTHIER)
+  OrderResponse updateService(UUID id, UUID itemId, UpdateService request, String user);
 
   @PreAuthorize(Access.ADMIN_OR_LUTHIER)
   OrderResponse markServiceDone(UUID id, UUID itemId, String user);
