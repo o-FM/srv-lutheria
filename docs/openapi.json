@@ -771,6 +771,79 @@
                 }
             }
         },
+        "/service-orders/{id}/photos": {
+            "get": {
+                "tags": [
+                    "order-photo-controller"
+                ],
+                "operationId": "list_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PhotoResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "order-photo-controller"
+                ],
+                "operationId": "add",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddPhotoRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PhotoResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/service-orders/{id}/payments": {
             "post": {
                 "tags": [
@@ -899,7 +972,7 @@
                 "tags": [
                     "service-catalog-controller"
                 ],
-                "operationId": "list_1",
+                "operationId": "list_2",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1608,6 +1681,54 @@
                 }
             }
         },
+        "/users/me": {
+            "get": {
+                "tags": [
+                    "user-controller"
+                ],
+                "operationId": "me",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "user-controller"
+                ],
+                "operationId": "updateMe",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateMyAccountRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountUpdateResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/service-orders/{id}": {
             "get": {
                 "tags": [
@@ -1678,19 +1799,40 @@
                 }
             }
         },
-        "/users/me": {
+        "/service-orders/{id}/photos/{photoId}/content": {
             "get": {
                 "tags": [
-                    "user-controller"
+                    "order-photo-controller"
                 ],
-                "operationId": "me",
+                "operationId": "content",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "photoId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/UserResponse"
+                                    "type": "string",
+                                    "format": "byte"
                                 }
                             }
                         }
@@ -1850,6 +1992,47 @@
                 }
             }
         },
+        "/portal/orders/{token}/photos/{photoId}": {
+            "get": {
+                "tags": [
+                    "customer-portal-controller"
+                ],
+                "operationId": "photo",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]{32}$"
+                        }
+                    },
+                    {
+                        "name": "photoId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "byte"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/notifications": {
             "get": {
                 "tags": [
@@ -1913,7 +2096,7 @@
                 "tags": [
                     "audit-controller"
                 ],
-                "operationId": "list_2",
+                "operationId": "list_3",
                 "parameters": [
                     {
                         "name": "page",
@@ -1986,6 +2169,39 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/service-orders/{id}/photos/{photoId}": {
+            "delete": {
+                "tags": [
+                    "order-photo-controller"
+                ],
+                "operationId": "delete",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "photoId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -2803,7 +3019,8 @@
                             "quote_rejected",
                             "service_done",
                             "payment_received",
-                            "note_added"
+                            "note_added",
+                            "photo_added"
                         ]
                     },
                     "title": {
@@ -2850,6 +3067,64 @@
                         "type": "string",
                         "maxLength": 1000,
                         "minLength": 0
+                    }
+                }
+            },
+            "AddPhotoRequest": {
+                "type": "object",
+                "properties": {
+                    "tag": {
+                        "type": "string",
+                        "enum": [
+                            "entrada",
+                            "diagnostico",
+                            "bancada",
+                            "finalizado",
+                            "detalhe_defeito"
+                        ]
+                    },
+                    "caption": {
+                        "type": "string",
+                        "maxLength": 200,
+                        "minLength": 0
+                    },
+                    "dataUrl": {
+                        "type": "string",
+                        "maxLength": 4200000,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "dataUrl",
+                    "tag"
+                ]
+            },
+            "PhotoResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "tag": {
+                        "type": "string",
+                        "enum": [
+                            "entrada",
+                            "diagnostico",
+                            "bancada",
+                            "finalizado",
+                            "detalhe_defeito"
+                        ]
+                    },
+                    "caption": {
+                        "type": "string"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "user": {
+                        "type": "string"
                     }
                 }
             },
@@ -3038,6 +3313,12 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Timeline"
+                        }
+                    },
+                    "photos": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PhotoResponse"
                         }
                     }
                 }
@@ -3263,6 +3544,46 @@
                 "required": [
                     "profile"
                 ]
+            },
+            "UpdateMyAccountRequest": {
+                "type": "object",
+                "properties": {
+                    "currentPassword": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "minLength": 0
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 254,
+                        "minLength": 0
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "minLength": 0
+                    },
+                    "newPassword": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "minLength": 12
+                    }
+                },
+                "required": [
+                    "currentPassword"
+                ]
+            },
+            "AccountUpdateResponse": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "$ref": "#/components/schemas/UserResponse"
+                    },
+                    "session": {
+                        "$ref": "#/components/schemas/TokenResponse"
+                    }
+                }
             },
             "UpdateOrder": {
                 "type": "object",

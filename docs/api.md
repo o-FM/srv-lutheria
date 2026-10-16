@@ -23,7 +23,8 @@ exportação LGPD. DELETE é exclusão lógica. Erros seguem RFC 9457 (`applicat
 | `POST /auth/register` | Cadastra luthieria + dono (ADMIN) e devolve tokens | público (rate limit) |
 | `POST /auth/login`, `/refresh`, `/logout`, `/forgot-password`, `/reset-password` | Sessão e senha | público (rate limit) |
 | `GET /users/me`, `GET/POST /users`, `PATCH /users/{id}/profile`, `POST /users/{id}/(de)activate` | Usuários da luthieria | todos (`me`) / ADMIN |
-| `/customers`, `/customers/{id}` | Clientes (`?search=` nome, telefone, CPF) | ADMIN, LUTHIER, ATENDENTE (DELETE: ADMIN) |
+| `PATCH /users/me` | Minha conta: e-mail, telefone e/ou senha. Exige `currentPassword`; trocar e-mail ou senha encerra as outras sessões e devolve tokens novos em `session` | todos |
+| `/customers`, `/customers/{id}` | Clientes (`?search=` nome, telefone, CPF); a listagem já traz os instrumentos | ADMIN, LUTHIER, ATENDENTE (DELETE: ADMIN) |
 | `/customers/{id}/instruments` | Instrumentos do cliente | ADMIN, LUTHIER, ATENDENTE |
 | `POST /customers/{id}/anonymize` | LGPD: eliminação dos dados pessoais | ADMIN |
 | `/products`, `/products/barcode/{code}`, `/products/{id}/movements` | Estoque e movimentações | escrita: ADMIN, LUTHIER, ESTOQUISTA; leitura: todos |
@@ -34,7 +35,8 @@ exportação LGPD. DELETE é exclusão lógica. Erros seguem RFC 9457 (`applicat
 | `POST /service-orders/{id}/status` | Transição de status (`pronto` só bancada) | balcão |
 | `POST /service-orders/{id}/quote/send\|approve\|reject` | Orçamento | balcão |
 | `POST /service-orders/{id}/notes`, `/payments` | Observações e pagamentos | balcão |
-| `GET /portal/orders/{token}`, `POST .../quote/approve\|reject` | Portal do cliente sem senha | público (rate limit) |
+| `GET/POST /service-orders/{id}/photos`, `GET .../photos/{photoId}/content`, `DELETE .../photos/{photoId}` | Fotos da OS (data URL base64 JPEG/PNG/WebP, até 3 MB, 40 por OS; o tipo é conferido pelos bytes) | balcão |
+| `GET /portal/orders/{token}`, `GET .../photos/{photoId}`, `POST .../quote/approve\|reject` | Portal do cliente sem senha (com as fotos da OS) | público (rate limit) |
 | `GET /reports/dashboard` | Tela "Hoje" | todos |
 | `GET /reports/financial?from=&to=` | Financeiro | ADMIN, LUTHIER |
 | `GET /notifications?channel=&status=`, `POST /notifications/{id}/sent` | Mensagens (e-mail, WhatsApp, alertas) | todos |

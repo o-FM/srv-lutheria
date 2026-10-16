@@ -211,6 +211,10 @@ public class ServiceOrderEntity extends TenantScopedEntity {
     }
   }
 
+  public void recordPhoto(String tag, String caption, String user) {
+    log(TimelineType.PHOTO_ADDED, "Foto adicionada: " + tag, caption, user);
+  }
+
   public void addNote(String note, String user) {
     log(TimelineType.NOTE_ADDED, "Observação", note, user);
   }

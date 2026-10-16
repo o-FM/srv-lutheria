@@ -22,9 +22,12 @@ import com.luthier.shared.validation.Phone;
 import com.luthier.shared.web.PageResponse;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,14 +75,23 @@ public class CustomerServiceImpl implements CustomerService, CustomerQueries {
   @Override
   @Transactional(readOnly = true)
   public PageResponse<CustomerResponse> search(String query, Pageable pageable) {
+    Page<CustomerEntity> page;
     if (query == null || query.isBlank()) {
-      return PageResponse.of(customerRepository.findAllByActiveTrue(pageable),
-          CustomerResponse::from);
+      page = customerRepository.findAllByActiveTrue(pageable);
+    } else {
+      var text = query.strip();
+      page = customerRepository.search(text, text.replaceAll("\\D", ""), pageable);
     }
-    var text = query.strip();
-    var digits = text.replaceAll("\\D", "");
-    return PageResponse.of(customerRepository.search(text, digits, pageable),
-        CustomerResponse::from);
+    // Instrumentos da página inteira numa consulta só (a tela de clientes e a abertura de OS
+    // mostram cliente + instrumentos juntos)
+    var ids = page.getContent().stream().map(CustomerEntity::getId).toList();
+    var byCustomer = ids.isEmpty()
+        ? Map.<UUID, List<InstrumentResponse>>of()
+        : instrumentRepository.findAllByCustomerIdInOrderByCreatedAtDesc(ids).stream()
+            .collect(Collectors.groupingBy(InstrumentEntity::getCustomerId,
+                Collectors.mapping(InstrumentResponse::from, Collectors.toList())));
+    return PageResponse.of(page,
+        c -> CustomerResponse.from(c, byCustomer.getOrDefault(c.getId(), List.of())));
   }
 
   @Override

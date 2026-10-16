@@ -75,6 +75,8 @@ public class UserEntity {
   public void deactivate() { this.active = false; }
 
   public void changePassword(String encodedPassword) { this.password = encodedPassword; }
+  public void changeEmail(String email) { this.email = email; }
+  public void changePhone(String phone) { this.phone = phone; }
 
   public static UserEntity newUser(UUID tenantId, String name, String email, String cpf,
       String phone, String password, Profile profile) {

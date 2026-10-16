@@ -2,6 +2,8 @@ package com.luthier.security.controllers;
 
 import com.luthier.security.domain.records.CreateUserRequest;
 import com.luthier.security.domain.records.UpdateProfileRequest;
+import com.luthier.security.domain.records.AccountUpdateResponse;
+import com.luthier.security.domain.records.UpdateMyAccountRequest;
 import com.luthier.security.domain.records.UserResponse;
 import com.luthier.security.services.UserManagementService;
 import jakarta.validation.Valid;
@@ -45,6 +47,12 @@ public class UserController {
   @GetMapping("/me")
   public UserResponse me(@AuthenticationPrincipal Jwt jwt) {
     return userManagementService.me(UUID.fromString(jwt.getClaimAsString("uid")));
+  }
+
+  @PatchMapping("/me")
+  public AccountUpdateResponse updateMe(@AuthenticationPrincipal Jwt jwt,
+      @Valid @RequestBody UpdateMyAccountRequest request) {
+    return userManagementService.updateMe(UUID.fromString(jwt.getClaimAsString("uid")), request);
   }
 
   @PatchMapping("/{id}/profile")
