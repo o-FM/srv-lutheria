@@ -71,6 +71,8 @@ e tokens/IDs ficam salvos nas variáveis da coleção — dá para rodar quantas
 Área do cliente: copie o código `XXXX-XXXX` do log da API (`[DEV] Código de acesso`) para a
 variável `accessCode` e rode a pasta 7. `baseUrl` padrão: `http://localhost:8080`.
 
+Mesmo fluxo em curl (requer `jq`): `bash postman/fluxo-curl.sh` — no passo 7 ele pede o código do log.
+
 ## Documentação
 
 - [API, multi-tenancy e ciclo da OS](docs/api.md) · [OpenAPI](docs/openapi.json)
