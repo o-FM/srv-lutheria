@@ -150,6 +150,33 @@ class RegistrationFlowTest {
   }
 
   @Test
+  void staffLogsInWithEmailOrCpf() throws Exception {
+    var cpf = randomCpf();
+    var masked = cpf.replaceFirst("(\\d{3})(\\d{3})(\\d{3})(\\d{2})", "$1.$2.$3-$4");
+    var email = "cpf-" + System.nanoTime() + "@teste.com";
+    mvc.perform(auth(post("/users"), tokenA).content("""
+            {"name":"Rafael","email":"%s","password":"Luthier@2026xx","cpf":"%s","profile":"LUTHIER"}"""
+            .formatted(email, masked)))
+        .andExpect(status().isCreated());
+
+    staffLogin(masked, "Luthier@2026xx", 200);
+    staffLogin(cpf, "Luthier@2026xx", 200);
+    staffLogin(email.toUpperCase(), "Luthier@2026xx", 200);
+    staffLogin("{\"email\":\"%s\",\"password\":\"Luthier@2026xx\"}".formatted(email), 200);
+    staffLogin(cpf, "SenhaErrada@2026", 401);
+    staffLogin("123.456.789-00", "Luthier@2026xx", 401);
+
+    // Mesmo CPF em outra oficina: CPF fica ambíguo → só por e-mail
+    var email2 = "cpf2-" + System.nanoTime() + "@teste.com";
+    mvc.perform(auth(post("/users"), tokenB).content("""
+            {"name":"Rafael","email":"%s","password":"Luthier@2026xx","cpf":"%s","profile":"LUTHIER"}"""
+            .formatted(email2, cpf)))
+        .andExpect(status().isCreated());
+    staffLogin(cpf, "Luthier@2026xx", 401);
+    staffLogin(email2, "Luthier@2026xx", 200);
+  }
+
+  @Test
   void eachUserKeepsOwnAppearancePreferences() throws Exception {
     var email = "cores-" + System.nanoTime() + "@teste.com";
     mvc.perform(auth(post("/users"), tokenA).content("""
@@ -201,6 +228,34 @@ class RegistrationFlowTest {
     String token = JsonPath.read(body, "$.accessToken");
     assertThat(token).isNotBlank();
     return token;
+  }
+
+  private void staffLogin(String identifier, String password, int expected) throws Exception {
+    staffLogin("{\"identifier\":\"%s\",\"password\":\"%s\"}".formatted(identifier, password),
+        expected);
+  }
+
+  private void staffLogin(String json, int expected) throws Exception {
+    var result = mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
+        .content(json)).andExpect(status().is(expected));
+    if (expected == 200) result.andExpect(jsonPath("$.accessToken").isNotEmpty());
+  }
+
+  /** CPF válido aleatório (dígitos verificadores corretos). */
+  private static String randomCpf() {
+    var rnd = java.util.concurrent.ThreadLocalRandom.current();
+    var d = new int[11];
+    for (int i = 0; i < 9; i++) d[i] = rnd.nextInt(10);
+    d[0] = 1 + rnd.nextInt(9);
+    for (int k = 9; k < 11; k++) {
+      int sum = 0;
+      for (int i = 0; i < k; i++) sum += d[i] * (k + 1 - i);
+      int r = (sum * 10) % 11;
+      d[k] = r == 10 ? 0 : r;
+    }
+    var sb = new StringBuilder();
+    for (int x : d) sb.append(x);
+    return sb.toString();
   }
 
   private String createCustomer(String token, String name) throws Exception {

@@ -18,4 +18,6 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
   Optional<UserEntity> findByUuidAndTenantId(UUID uuid, UUID tenantId);
   List<UserEntity> findAllByTenantIdOrderByNameAsc(UUID tenantId);
   boolean existsByTenantIdAndCpf(UUID tenantId, String cpf);
+
+  List<UserEntity> findAllByCpfAndActiveTrue(String cpf);
 }

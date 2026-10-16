@@ -4,6 +4,7 @@ import com.luthier.notification.domain.enums.Channel;
 import com.luthier.notification.domain.enums.DeliveryStatus;
 import com.luthier.notification.domain.records.NotificationResponse;
 import com.luthier.notification.domain.repositories.NotificationRepository;
+import com.luthier.notification.listeners.CustomerAccessListeners;
 import com.luthier.notification.services.NotificationService;
 import com.luthier.shared.errors.BadRequestException;
 import com.luthier.shared.errors.NotFoundException;
@@ -19,9 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationServiceImpl implements NotificationService {
 
   private final NotificationRepository repository;
+  private final CustomerAccessListeners.Handlers customerAccess;
 
-  public NotificationServiceImpl(NotificationRepository repository) {
+  public NotificationServiceImpl(NotificationRepository repository,
+      CustomerAccessListeners.Handlers customerAccess) {
     this.repository = repository;
+    this.customerAccess = customerAccess;
   }
 
   @Override
@@ -38,6 +42,11 @@ public class NotificationServiceImpl implements NotificationService {
         .orElseThrow(() -> new NotFoundException("Notification not found!"));
     n.markSent();
     return NotificationResponse.from(n);
+  }
+
+  @Override
+  public NotificationResponse sendCustomerAccessCode(UUID customerId) {
+    return NotificationResponse.from(customerAccess.resendCode(customerId));
   }
 
   private static Channel parseChannel(String value) {

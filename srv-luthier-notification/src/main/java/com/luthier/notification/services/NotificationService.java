@@ -16,4 +16,8 @@ public interface NotificationService {
   /** WhatsApp enviado manualmente pelo balcão / alerta lido. */
   @PreAuthorize(Access.ANY_STAFF)
   NotificationResponse markSent(UUID id);
+
+  /** Gera um novo código de acesso do cliente (revoga o anterior) e envia pelo WhatsApp. */
+  @PreAuthorize(Access.CUSTOMER_DESK)
+  NotificationResponse sendCustomerAccessCode(UUID customerId);
 }

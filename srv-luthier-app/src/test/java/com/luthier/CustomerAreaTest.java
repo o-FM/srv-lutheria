@@ -27,8 +27,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Área do cliente: OS aberta → WhatsApp automático com link + código → cliente entra com
- * telefone + código e vê só as próprias OS.
+ * Área do cliente: OS aberta → WhatsApp automático com link + código amigável (XXXX-XXXX) →
+ * cliente entra só com o código e vê apenas as próprias OS.
  */
 @SpringBootTest(properties = "app.security.rate-limit.login.capacity=1000")
 @AutoConfigureMockMvc
@@ -59,8 +59,9 @@ class CustomerAreaTest {
 
   ApiClient api;
   String admin;
-  String slug;
   String phone;
+  String customerId;
+  String instrumentId;
   String orderId;
 
   @BeforeEach
@@ -68,24 +69,22 @@ class CustomerAreaTest {
     api = new ApiClient(mvc);
     admin = api.registerWorkshop("Oficina Cliente " + System.nanoTime());
     phone = "119%08d".formatted(Math.floorMod(System.nanoTime(), 100_000_000L));
-    var customer = api.create(admin, "/customers",
+    customerId = api.create(admin, "/customers",
         "{\"name\":\"Lucas Silveira\",\"phone\":\"%s\"}".formatted(phone));
-    var instrument = api.create(admin, "/customers/" + customer + "/instruments",
+    instrumentId = api.create(admin, "/customers/" + customerId + "/instruments",
         "{\"type\":\"guitarra\",\"brand\":\"Fender\",\"model\":\"Strat\"}");
-    orderId = api.create(admin, "/service-orders", """
-        {"customerId":"%s","instrumentId":"%s","reportedIssue":"Trastejando",
-         "services":[{"title":"Regulagem","laborPrice":180}]}""".formatted(customer, instrument));
+    orderId = openOrder(instrumentId);
   }
 
   @Test
   void openingAnOrderSendsLinkAndCodeAndCustomerSeesOnlyOwnOrders() throws Exception {
-    // WhatsApp automático: mensagem de OS aberta (com o link) + código
-    var code = awaitCode();
+    // WhatsApp automático: mensagem de OS aberta (com o link) + código amigável
+    var code = awaitCode(null);
+    assertThat(code).matches("[2-9A-HJKMNP-TV-Z]{4}-[2-9A-HJKMNP-TV-Z]{4}");
     var opened = FakeWhatsApp.SENT.stream()
         .filter(s -> s.phone().equals(phone) && s.template().equals("luthieria_os_aberta"))
         .findFirst().orElseThrow();
-    assertThat(opened.params().get(3)).contains("/cliente/");
-    slug = opened.params().get(3).substring(opened.params().get(3).lastIndexOf('/') + 1);
+    assertThat(opened.params().get(3)).endsWith("/cliente");
 
     // Histórico da oficina não guarda o código
     mvc.perform(auth(get("/notifications?channel=whatsapp"), admin))
@@ -93,7 +92,8 @@ class CustomerAreaTest {
             .value(org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.not(
                 org.hamcrest.Matchers.containsString(code)))));
 
-    var client = login(code);
+    // Só o código: sem telefone nem oficina; aceita minúsculas e sem traço
+    var client = login(code.replace("-", "").toLowerCase());
     mvc.perform(auth(get("/client/orders"), client))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(1))
@@ -110,60 +110,70 @@ class CustomerAreaTest {
     // Token de cliente não acessa nada do balcão
     mvc.perform(auth(get("/customers"), client)).andExpect(status().isForbidden());
     mvc.perform(auth(get("/service-orders/" + orderId), client)).andExpect(status().isForbidden());
-    // Código é de uso único
-    loginExpecting(code, 401);
+    mvc.perform(auth(post("/customers/" + customerId + "/access-code"), client))
+        .andExpect(status().isForbidden());
+
+    // Código é reutilizável
+    assertThat(login(code)).isNotBlank();
   }
 
   @Test
-  void wrongCodesAreLimitedAndNewCodeCanBeRequested() throws Exception {
-    var code = awaitCode();
-    slug = workshopSlug();
-    var wrong = code.equals("000000") ? "111111" : "000000";
-    for (int i = 0; i < 5; i++) {
-      loginExpecting(wrong, 401);
-    }
-    // Após 5 erros o código certo também deixa de valer
-    loginExpecting(code, 401);
+  void newOrderOrDeskResendRotatesTheCode() throws Exception {
+    var first = awaitCode(null);
+    loginExpecting("ZZZZ-ZZZZ".equals(first) ? "YYYY-YYYY" : "ZZZZ-ZZZZ", 401);
+    loginExpecting("abc", 401);
 
-    FakeWhatsApp.SENT.removeIf(s -> s.phone().equals(phone));
-    mvc.perform(post("/auth/customer/request-code").contentType(MediaType.APPLICATION_JSON)
-            .content("{\"workshop\":\"%s\",\"phone\":\"%s\"}".formatted(slug, phone)))
-        .andExpect(status().isAccepted());
-    var fresh = awaitCode();
-    assertThat(login(fresh)).isNotBlank();
+    // Nova OS → novo código; o anterior deixa de valer
+    openOrder(instrumentId);
+    var second = awaitCode(first);
+    loginExpecting(first, 401);
+    var client = login(second);
+    mvc.perform(auth(get("/client/orders"), client)).andExpect(jsonPath("$.length()").value(2));
 
-    // Telefone desconhecido: mesma resposta, nada é enviado
-    mvc.perform(post("/auth/customer/request-code").contentType(MediaType.APPLICATION_JSON)
-            .content("{\"workshop\":\"%s\",\"phone\":\"11900000000\"}".formatted(slug)))
-        .andExpect(status().isAccepted());
+    // Balcão: "Enviar código de acesso"
+    mvc.perform(auth(post("/customers/" + customerId + "/access-code"), admin))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.status").value("enviado"))
+        .andExpect(jsonPath("$.body").value(org.hamcrest.Matchers.not(
+            org.hamcrest.Matchers.containsString(second))));
+    var third = awaitCode(second);
+    loginExpecting(second, 401);
+    assertThat(login(third)).isNotBlank();
+
+    // Cliente de outra oficina não existe aqui
+    var otherAdmin = api.registerWorkshop("Outra Oficina " + System.nanoTime());
+    mvc.perform(auth(post("/customers/" + customerId + "/access-code"), otherAdmin))
+        .andExpect(status().isNotFound());
   }
 
   // ---- helpers ----
 
-  private String awaitCode() {
-    return await().atMost(Duration.ofSeconds(10)).until(() -> FakeWhatsApp.SENT.stream()
-        .filter(s -> s.phone().equals(phone) && s.template().equals("luthieria_codigo_acesso"))
-        .reduce((a, b) -> b).map(Sent::button).orElse(null), c -> c != null);
+  private String openOrder(String instrument) throws Exception {
+    return api.create(admin, "/service-orders", """
+        {"customerId":"%s","instrumentId":"%s","reportedIssue":"Trastejando",
+         "services":[{"title":"Regulagem","laborPrice":180}]}""".formatted(customerId, instrument));
   }
 
-  private String workshopSlug() {
-    var link = await().atMost(Duration.ofSeconds(10)).until(() -> FakeWhatsApp.SENT.stream()
-        .filter(s -> s.phone().equals(phone) && s.template().equals("luthieria_os_aberta"))
-        .findFirst().map(s -> s.params().get(3)).orElse(null), l -> l != null);
-    return link.substring(link.lastIndexOf('/') + 1);
+  /** Último código enviado ao telefone, esperando até ser diferente de "previous". */
+  private String awaitCode(String previous) {
+    return await().atMost(Duration.ofSeconds(10)).until(() -> FakeWhatsApp.SENT.stream()
+        .filter(s -> s.phone().equals(phone) && s.template().equals("luthieria_codigo_acesso"))
+        .reduce((a, b) -> b).map(Sent::button).orElse(null),
+        c -> c != null && !c.equals(previous));
   }
 
   private String login(String code) throws Exception {
     var body = mvc.perform(post("/auth/customer/login").contentType(MediaType.APPLICATION_JSON)
-            .content("{\"workshop\":\"%s\",\"phone\":\"%s\",\"code\":\"%s\"}".formatted(slug, phone, code)))
+            .content("{\"code\":\"%s\"}".formatted(code)))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("$.refreshToken").value(org.hamcrest.Matchers.nullValue()))
         .andReturn().getResponse().getContentAsString();
     return JsonPath.read(body, "$.accessToken");
   }
 
   private void loginExpecting(String code, int expected) throws Exception {
     mvc.perform(post("/auth/customer/login").contentType(MediaType.APPLICATION_JSON)
-            .content("{\"workshop\":\"%s\",\"phone\":\"%s\",\"code\":\"%s\"}".formatted(slug, phone, code)))
+            .content("{\"code\":\"%s\"}".formatted(code)))
         .andExpect(status().is(expected));
   }
 }

@@ -11,15 +11,14 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Código de acesso da área do cliente. Só o HMAC do código é guardado. Uso único, com prazo e
- * limite de tentativas. tenant_id é coluna simples: o login acontece antes de haver tenant.
+ * Código de acesso da área do cliente. Só o HMAC do código é guardado (índice único, usado na
+ * busca do login). Pode ser usado várias vezes até expirar ou ser revogado por um código novo.
+ * tenant_id é coluna simples: o login acontece antes de haver tenant.
  */
 @Entity
 @Table(name = "CUSTOMER_ACCESS_CODE_TB", indexes =
-    @Index(name = "idx_access_code_tenant_phone", columnList = "tenant_id, phone"))
+    @Index(name = "idx_access_code_tenant_customer", columnList = "tenant_id, customer_id"))
 public class CustomerAccessCodeEntity {
-
-  public static final int MAX_ATTEMPTS = 5;
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -34,17 +33,17 @@ public class CustomerAccessCodeEntity {
   @Column(nullable = false, length = 11, updatable = false)
   private String phone;
 
-  @Column(name = "code_hash", nullable = false, length = 64, updatable = false)
+  @Column(name = "code_hash", nullable = false, unique = true, length = 64, updatable = false)
   private String codeHash;
 
   @Column(name = "expires_at", nullable = false, updatable = false)
   private Instant expiresAt;
 
-  @Column(nullable = false)
-  private int attempts;
+  @Column(name = "revoked_at")
+  private Instant revokedAt;
 
-  @Column(name = "used_at")
-  private Instant usedAt;
+  @Column(name = "last_login_at")
+  private Instant lastLoginAt;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   private Instant createdAt;
@@ -63,16 +62,13 @@ public class CustomerAccessCodeEntity {
     return c;
   }
 
-  public boolean isUsable(Instant now) {
-    return usedAt == null && attempts < MAX_ATTEMPTS && expiresAt.isAfter(now);
+  public boolean isValid(Instant now) {
+    return revokedAt == null && expiresAt.isAfter(now);
   }
 
-  public void registerFailedAttempt() { attempts++; }
-
-  public void markUsed(Instant now) { usedAt = now; }
+  public void registerLogin(Instant now) { lastLoginAt = now; }
 
   public UUID getTenantId() { return tenantId; }
   public UUID getCustomerId() { return customerId; }
   public String getPhone() { return phone; }
-  public String getCodeHash() { return codeHash; }
 }

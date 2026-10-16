@@ -4,11 +4,15 @@ import java.time.Duration;
 import java.util.UUID;
 
 /**
- * API pública: emite códigos de acesso de uso único para a área do cliente. Quem envia o código
- * (WhatsApp) é o módulo de notificações; aqui só se gera e guarda o hash.
+ * API pública: código de acesso da área do cliente. O cliente entra digitando SÓ o código, então
+ * ele é único na plataforma e tem 8 caracteres de um alfabeto sem ambiguidade (ex.: K7M4-P9QX).
+ * Quem envia o código (WhatsApp) é o módulo de notificações; aqui só se gera e guarda o hash.
  */
 public interface CustomerAccessCodes {
 
-  /** Código de 6 dígitos. Invalida os códigos anteriores do mesmo cliente. Retorna o valor bruto. */
+  /** Gera um código novo e revoga os anteriores do cliente. Retorna o valor formatado (XXXX-XXXX). */
   String issue(UUID tenantId, UUID customerId, String phoneDigits, Duration ttl);
+
+  /** Revoga todos os códigos do cliente (ex.: dados anonimizados). */
+  void revokeAll(UUID tenantId, UUID customerId);
 }

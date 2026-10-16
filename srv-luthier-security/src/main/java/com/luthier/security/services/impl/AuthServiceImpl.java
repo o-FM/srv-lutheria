@@ -17,7 +17,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 import com.luthier.shared.audit.AuditEvent;
+import com.luthier.shared.validation.Cpf;
 import com.luthier.shared.validation.Masks;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
@@ -48,27 +51,50 @@ public class AuthServiceImpl implements AuthService {
     this.refreshTtl = Duration.ofDays(props.tokens().refreshDays());
   }
 
+  /**
+   * E-mail é único na plataforma. CPF é único só dentro de cada luthieria, então um CPF pode ter
+   * conta em mais de uma: tentamos a senha em cada conta ativa com aquele CPF; se servir em mais de
+   * uma, pedimos o e-mail para saber de qual oficina se trata.
+   */
   @Override
   @Transactional
   public TokenResponse login(LoginRequest request) {
-    var email = request.email().strip();
+    var identifier = request.identifier().strip();
+    var byEmail = identifier.contains("@");
+    var cpf = byEmail ? null : Cpf.digits(identifier);
+    List<String> emails = byEmail
+        ? List.of(identifier.toLowerCase(java.util.Locale.ROOT))
+        // Sem CPF válido não consulta nada (evita "cpf is null" casar com todos os usuários)
+        : cpf == null || !Cpf.isValid(cpf) ? List.of()
+        : userRepository.findAllByCpfAndActiveTrue(cpf).stream().map(UserEntity::getEmail).toList();
 
-    try {
-      authenticationManager.authenticate(
-          UsernamePasswordAuthenticationToken.unauthenticated(email, request.password())
-      );
-    } catch (AuthenticationException e) {
-      var tenantId = userRepository.findByEmailIgnoreCase(email)
-          .map(UserEntity::getTenantId).orElse(null);
-      events.publishEvent(new AuditEvent(tenantId, "LOGIN_FAILED", "user", null,
-          Masks.email(email) + " · " + e.getClass().getSimpleName()));
-      throw e;
+    List<UserEntity> matches = new ArrayList<>();
+    AuthenticationException failure = new BadCredentialsException("Bad credentials");
+    for (var email : emails) {
+      try {
+        authenticationManager.authenticate(
+            UsernamePasswordAuthenticationToken.unauthenticated(email, request.password()));
+        userRepository.findByEmailIgnoreCase(email).ifPresent(matches::add);
+      } catch (AuthenticationException e) {
+        failure = e;
+      }
     }
 
-    var user = userRepository.findByEmailIgnoreCase(email)
-        .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
+    if (matches.isEmpty()) {
+      var tenantId = emails.isEmpty() ? null : userRepository.findByEmailIgnoreCase(emails.getFirst())
+          .map(UserEntity::getTenantId).orElse(null);
+      var who = byEmail ? Masks.email(identifier) : "CPF " + (cpf == null ? "inválido" : Cpf.mask(cpf));
+      events.publishEvent(new AuditEvent(tenantId, "LOGIN_FAILED", "user", null,
+          who + " · " + failure.getClass().getSimpleName()));
+      throw failure;
+    }
+    if (matches.size() > 1) {
+      throw new BadCredentialsException("CPF em mais de uma oficina: entre com o e-mail");
+    }
+
+    var user = matches.getFirst();
     events.publishEvent(new AuditEvent(user.getTenantId(), "LOGIN_SUCCESS", "user",
-        user.getUuid().toString(), null));
+        user.getUuid().toString(), byEmail ? "e-mail" : "CPF"));
 
     return issue(user, UUID.randomUUID());
   }

@@ -21,7 +21,7 @@ exportação LGPD. DELETE é exclusão lógica. Erros seguem RFC 9457 (`applicat
 | Rota | Descrição | Papéis |
 |---|---|---|
 | `POST /auth/register` | Cadastra luthieria + dono (ADMIN) e devolve tokens | público (rate limit) |
-| `POST /auth/login`, `/refresh`, `/logout`, `/forgot-password`, `/reset-password` | Sessão e senha | público (rate limit) |
+| `POST /auth/login`, `/refresh`, `/logout`, `/forgot-password`, `/reset-password` | Sessão e senha. Login: `{"identifier": e-mail ou CPF, "password"}` (`email` ainda é aceito) | público (rate limit) |
 | `GET /users/me`, `GET/POST /users`, `PATCH /users/{id}/profile`, `POST /users/{id}/(de)activate` | Usuários da luthieria | todos (`me`) / ADMIN |
 | `/customers`, `/customers/{id}` | Clientes (`?search=` nome, telefone, CPF) | ADMIN, LUTHIER, ATENDENTE (DELETE: ADMIN) |
 | `/customers/{id}/instruments` | Instrumentos do cliente | ADMIN, LUTHIER, ATENDENTE |
@@ -36,7 +36,8 @@ exportação LGPD. DELETE é exclusão lógica. Erros seguem RFC 9457 (`applicat
 | `POST /service-orders/{id}/quote/send\|approve\|reject` | Orçamento | balcão |
 | `POST /service-orders/{id}/notes`, `/payments` | Observações e pagamentos | balcão |
 | `GET /portal/orders/{token}`, `POST .../quote/approve\|reject` | Portal do cliente sem senha | público (rate limit) |
-| `POST /auth/customer/request-code`, `POST /auth/customer/login` | Área do cliente: novo código / login com telefone + código | público (rate limit) |
+| `POST /auth/customer/login` | Área do cliente: login só com o código `{"code":"K7QM-4XPA"}` | público (rate limit) |
+| `POST /customers/{id}/access-code` | Balcão: gera um novo código de acesso e envia pelo WhatsApp (revoga o anterior) | ADMIN, LUTHIER, ATENDENTE |
 | `GET /client/me`, `GET /client/orders`, `GET /client/orders/{id}`, `POST /client/orders/{id}/quote/approve\|reject` | Área do cliente (só as próprias OS) | CLIENTE |
 | `GET /reports/dashboard` | Tela "Hoje" | todos |
 | `GET /reports/financial?from=&to=` | Financeiro | ADMIN, LUTHIER |
@@ -45,18 +46,28 @@ exportação LGPD. DELETE é exclusão lógica. Erros seguem RFC 9457 (`applicat
 | `GET /audit-logs` | Trilha de auditoria | ADMIN |
 | `GET /actuator/health`, `/info`, `/prometheus` | Operação (em prod, porta 8081 interna) | público |
 
+## Login dos profissionais (e-mail ou CPF)
+
+`POST /auth/login` aceita o e-mail ou o CPF (com ou sem máscara) no campo `identifier`. Se o mesmo
+CPF estiver cadastrado em mais de uma oficina, o login por CPF é recusado (401) e é preciso usar o
+e-mail. Erros de credencial respondem sempre o mesmo 401 genérico.
+
 ## Área do cliente (código pelo WhatsApp)
 
 1. Ao abrir a OS, o módulo de notificações envia **automaticamente** pela WhatsApp Cloud API:
-   o template `luthieria_os_aberta` (link `{FRONTEND_URL}/cliente/{slug-da-oficina}`) e o template
-   de autenticação `luthieria_codigo_acesso` com um código de 6 dígitos (válido por 72h).
-2. O cliente entra com telefone + código (`/auth/customer/login`) e recebe um JWT de papel
-   `CLIENTE` (7 dias, sem refresh) com `tid` e `cid`: só enxerga as próprias OS.
-3. Código expirado/usado: "receber novo código" (`/auth/customer/request-code`, sempre 202)
-   envia outro, válido por 10 min.
+   o template `luthieria_os_aberta` (link `{FRONTEND_URL}/cliente`) e o template de autenticação
+   `luthieria_codigo_acesso` com um **código amigável** no formato `XXXX-XXXX` (8 caracteres de um
+   alfabeto sem símbolos ambíguos: sem 0/O, 1/I/L, U).
+2. O cliente digita **só o código** (`/auth/customer/login`; maiúsculas/minúsculas e traço são
+   indiferentes) e recebe um JWT de papel `CLIENTE` (7 dias, sem refresh) com `tid` e `cid`:
+   só enxerga as próprias OS.
+3. O código é **reutilizável por 90 dias**. Cada OS nova gera um código novo e o anterior deixa de
+   valer. Perdeu o código? O balcão usa "Enviar código de acesso" na ficha do cliente
+   (`POST /customers/{id}/access-code`). Cliente anonimizado (LGPD) tem os códigos revogados.
 
-Segurança: só o HMAC-SHA256 do código é gravado (chave do servidor), uso único, 5 tentativas,
-rate limit por IP; o histórico de notificações guarda a mensagem com o código mascarado.
+Segurança: só o HMAC-SHA256 do código é gravado (chave do servidor, índice único); espaço de
+30^8 ≈ 6,5×10^11 combinações + rate limit por IP tornam força bruta inviável; o histórico de
+notificações guarda a mensagem com o código mascarado (`••••-••••`).
 Sem `WHATSAPP_PHONE_NUMBER_ID`/`WHATSAPP_TOKEN` nada é enviado (registrado como falha); em dev o
 código aparece no log.
 

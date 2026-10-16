@@ -17,7 +17,7 @@ psql -h localhost -U luthieria_app -d luthieria -f db/postgresql/02_schema.sql
 ## Relação com o Flyway
 
 A aplicação **já cria e evolui o schema sozinha** pelas migrations Flyway de cada módulo
-(`srv-luthier-*/src/main/resources/db/migration`, versões 1.0 a 4.3). O `02_schema.sql` é a
+(`srv-luthier-*/src/main/resources/db/migration`, versões 1.0 a 4.4). O `02_schema.sql` é a
 consolidação dessas migrations no estado atual — o schema resultante é idêntico (conferido coluna
 a coluna, restrições e índices).
 
@@ -29,7 +29,7 @@ Escolha **um** dos caminhos:
 
    ```bash
    SPRING_FLYWAY_BASELINE_ON_MIGRATE=true
-   SPRING_FLYWAY_BASELINE_VERSION=4.3
+   SPRING_FLYWAY_BASELINE_VERSION=4.4
    ```
 
    Migrations futuras (V4.4 em diante) continuam sendo aplicadas normalmente pelo Flyway.

@@ -29,7 +29,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
   private static final Set<String> AUTH_PATHS = Set.of(
       "/auth/login", "/auth/refresh", "/auth/forgot-password", "/auth/reset-password",
-      "/auth/register", "/auth/customer/request-code", "/auth/customer/login");
+      "/auth/register", "/auth/customer/login");
 
   private final Predicate<HttpServletRequest> matcher;
   private final Function<HttpServletRequest, String> bucketKey;
