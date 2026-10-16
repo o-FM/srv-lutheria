@@ -25,10 +25,11 @@ exportação LGPD. DELETE é exclusão lógica. Erros seguem RFC 9457 (`applicat
 | `GET /users/me`, `GET/POST /users`, `PATCH /users/{id}/profile`, `POST /users/{id}/(de)activate` | Usuários da luthieria | todos (`me`) / ADMIN |
 | `/customers`, `/customers/{id}` | Clientes (`?search=` nome, telefone, CPF) | ADMIN, LUTHIER, ATENDENTE (DELETE: ADMIN) |
 | `/customers/{id}/instruments` | Instrumentos do cliente | ADMIN, LUTHIER, ATENDENTE |
+| `GET /instruments` | Todos os instrumentos da luthieria | ADMIN, LUTHIER, ATENDENTE |
 | `POST /customers/{id}/anonymize` | LGPD: eliminação dos dados pessoais | ADMIN |
 | `/products`, `/products/barcode/{code}`, `/products/{id}/movements` | Estoque e movimentações | escrita: ADMIN, LUTHIER, ESTOQUISTA; leitura: todos |
 | `/service-catalog` | Catálogo de serviços | escrita: ADMIN, LUTHIER; leitura: todos |
-| `/service-orders` | OS: abertura, lista/kanban (`?status=&customerId=&number=`), detalhe, `PATCH` | balcão (ADMIN, LUTHIER, ATENDENTE) |
+| `/service-orders` | OS: abertura, lista/kanban (`?status=&customerId=&number=&full=`), detalhe, `PATCH` | balcão (ADMIN, LUTHIER, ATENDENTE) |
 | `/service-orders/{id}/services`, `.../services/{item}/done` | Serviços da OS / concluir item | balcão / bancada (ADMIN, LUTHIER) |
 | `/service-orders/{id}/parts` | Peças da OS | bancada |
 | `POST /service-orders/{id}/status` | Transição de status (`pronto` só bancada) | balcão |
