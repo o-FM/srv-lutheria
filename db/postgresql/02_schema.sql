@@ -1,7 +1,7 @@
 -- =============================================================================
 -- srv-luthieria · PostgreSQL 15+ · 02 — tabelas, índices e restrições
 --
--- Consolidação das migrations Flyway V1.0 a V4.2 (uma por módulo, em
+-- Consolidação das migrations Flyway V1.0 a V4.3 (uma por módulo, em
 -- srv-luthier-*/src/main/resources/db/migration). Executar conectado ao banco da aplicação:
 --   psql -h <host> -U luthieria_app -d luthieria -f 02_schema.sql
 --
@@ -10,8 +10,8 @@
 --
 -- IMPORTANTE: a aplicação já cria este schema sozinha via Flyway. Use este script só se o banco
 -- for criado manualmente (DBA); depois suba a aplicação com
---   SPRING_FLYWAY_BASELINE_ON_MIGRATE=true  SPRING_FLYWAY_BASELINE_VERSION=4.2
--- para o Flyway registrar que o schema já está na versão 4.2 (ver README.md desta pasta).
+--   SPRING_FLYWAY_BASELINE_ON_MIGRATE=true  SPRING_FLYWAY_BASELINE_VERSION=4.3
+-- para o Flyway registrar que o schema já está na versão 4.3 (ver README.md desta pasta).
 -- =============================================================================
 
 BEGIN;
@@ -91,6 +91,20 @@ CREATE TABLE audit_log_tb (
 );
 CREATE INDEX idx_audit_tenant_created ON audit_log_tb (tenant_id, created_at);
 COMMENT ON TABLE audit_log_tb IS 'Trilha de auditoria (LGPD). tenant_id nulo = evento de plataforma.';
+
+CREATE TABLE customer_access_code_tb (
+    id           uuid        NOT NULL PRIMARY KEY,
+    tenant_id    uuid        NOT NULL,
+    customer_id  uuid        NOT NULL,
+    phone        varchar(11) NOT NULL,
+    code_hash    varchar(64) NOT NULL,
+    expires_at   timestamptz NOT NULL,
+    attempts     integer     NOT NULL,
+    used_at      timestamptz,
+    created_at   timestamptz NOT NULL
+);
+CREATE INDEX idx_access_code_tenant_phone ON customer_access_code_tb (tenant_id, phone);
+COMMENT ON TABLE customer_access_code_tb IS 'Área do cliente: códigos de uso único enviados pelo WhatsApp (só o HMAC).';
 
 -- -----------------------------------------------------------------------------
 -- Spring Modulith: outbox de eventos entre módulos

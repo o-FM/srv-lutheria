@@ -12,6 +12,8 @@ public interface TenantRepository extends JpaRepository<TenantEntity, UUID> {
 
   boolean existsBySlug(String slug);
 
+  java.util.Optional<TenantEntity> findBySlugAndActiveTrue(String slug);
+
   @Query("select count(t) > 0 from TenantEntity t where t.id = :id and t.active = true")
   boolean isActive(@Param("id") UUID id);
 }

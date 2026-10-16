@@ -1,5 +1,6 @@
 package com.luthier.security.domain.filters;
 
+import com.luthier.shared.tenancy.CustomerContext;
 import com.luthier.shared.tenancy.TenantContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -42,13 +43,20 @@ public class TenantContextFilter extends OncePerRequestFilter {
     }
 
     TenantContext.set(tenantId);
+    // Área do cliente: o token traz o cliente (cid); usado para filtrar as OS dele
+    var customerId = jwtAuth.getToken().getClaimAsString("cid");
+    if (customerId != null) {
+      CustomerContext.set(UUID.fromString(customerId));
+    }
     // Logs (inclusive JSON/ECS em produção) passam a trazer luthieria e usuário de cada linha
     MDC.put("tenantId", tenantId.toString());
-    MDC.put("userId", jwtAuth.getToken().getClaimAsString("uid"));
+    var uid = jwtAuth.getToken().getClaimAsString("uid");
+    MDC.put("userId", uid != null ? uid : "cliente");
     try {
       chain.doFilter(request, response);
     } finally {
       TenantContext.clear();
+      CustomerContext.clear();
       MDC.remove("tenantId");
       MDC.remove("userId");
     }

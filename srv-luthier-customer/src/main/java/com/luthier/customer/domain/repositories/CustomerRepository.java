@@ -22,6 +22,8 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, UUID> 
 
   long countByActiveTrue();
 
+  Optional<CustomerEntity> findFirstByPhoneAndActiveTrueOrderByCreatedAtAsc(String phone);
+
   boolean existsByCpfAndIdNot(String cpf, UUID id);
 
   Page<CustomerEntity> findAllByActiveTrue(Pageable pageable);

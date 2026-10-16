@@ -191,6 +191,13 @@ public class CustomerServiceImpl implements CustomerService, CustomerQueries {
 
   @Override
   @Transactional(readOnly = true)
+  public Optional<CustomerSummary> findByPhone(String phoneDigits) {
+    return customerRepository.findFirstByPhoneAndActiveTrueOrderByCreatedAtAsc(phoneDigits)
+        .map(c -> new CustomerSummary(c.getId(), c.getName(), c.getPhone(), c.getEmail()));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
   public long countActive() {
     return customerRepository.countByActiveTrue();
   }

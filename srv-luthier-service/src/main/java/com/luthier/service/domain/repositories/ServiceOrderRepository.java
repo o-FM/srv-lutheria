@@ -39,6 +39,8 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrderEntity
 
   List<ServiceOrderEntity> findAllByCustomerIdOrderByOrderNumberDesc(UUID customerId);
 
+  Optional<ServiceOrderEntity> findByIdAndCustomerId(UUID id, UUID customerId);
+
   // ---------------- relatórios ----------------
 
   @Query("select o.status, count(o) from ServiceOrderEntity o group by o.status")

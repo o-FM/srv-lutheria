@@ -3,6 +3,7 @@ package com.luthier.service.services.impl;
 import com.luthier.customer.CustomerQueries;
 import com.luthier.product.ProductQueries;
 import com.luthier.product.StockConsumptionRequested;
+import com.luthier.service.ServiceOrderOpened;
 import com.luthier.service.ServiceOrderStatusChanged;
 import com.luthier.service.domain.entities.OrderCounterEntity;
 import com.luthier.service.domain.entities.OrderPartEntity;
@@ -79,7 +80,11 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
     if (request.services() != null) {
       request.services().forEach(s -> addServiceTo(order, s));
     }
-    return OrderResponse.from(saveAndFlush(order));
+    var saved = saveAndFlush(order);
+    events.publishEvent(new ServiceOrderOpened(TenantContext.require(), saved.getId(),
+        saved.getOrderNumber(), saved.getCustomerId(), saved.getInstrumentId(),
+        saved.getTrackingToken()));
+    return OrderResponse.from(saved);
   }
 
   @Override

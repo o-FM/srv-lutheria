@@ -22,6 +22,9 @@ public final class Access {
   public static final String ANY_STAFF = "hasAnyRole('" + Roles.ADMIN + "','" + Roles.LUTHIER
       + "','" + Roles.ATTENDANT + "','" + Roles.STOCK_CLERK + "')";
 
+  /** Somente o cliente logado na área do cliente (vê apenas as próprias OS). */
+  public static final String CUSTOMER = "hasRole('" + Roles.CUSTOMER + "')";
+
   private Access() {
   }
 }

@@ -21,12 +21,15 @@ public class TokenServiceImpl implements TokenService {
 
   private final JwtEncoder jwtEncoder;
   private final long expirationInMinutes;
+  private final long customerExpirationInHours;
 
   public TokenServiceImpl(
       JwtEncoder jwtEncoder,
-      @Value("${luthieria.jwt.expiracao-minutos}") long expirationInMinutes) {
+      @Value("${luthieria.jwt.expiracao-minutos}") long expirationInMinutes,
+      @Value("${luthieria.jwt.cliente-horas:168}") long customerExpirationInHours) {
     this.jwtEncoder = jwtEncoder;
     this.expirationInMinutes = expirationInMinutes;
+    this.customerExpirationInHours = customerExpirationInHours;
   }
 
   @Override
@@ -49,6 +52,32 @@ public class TokenServiceImpl implements TokenService {
     var header = JwsHeader.with(MacAlgorithm.HS256).build();
 
     return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+  }
+
+  /**
+   * Sessão longa (padrão 7 dias) e sem refresh: o cliente só lê as próprias OS e responde
+   * orçamentos; ao expirar, pede um novo código pelo WhatsApp.
+   */
+  @Override
+  public String generateForCustomer(UUID tenantId, UUID customerId, String phone) {
+    var now = Instant.now();
+    var claims = JwtClaimsSet.builder()
+        .issuer(ISSUER)
+        .subject("cliente:" + customerId)
+        .id(UUID.randomUUID().toString())
+        .issuedAt(now)
+        .expiresAt(now.plus(customerExpirationInHours, ChronoUnit.HOURS))
+        .claim("tid", tenantId.toString())
+        .claim("cid", customerId.toString())
+        .claim("roles", List.of(com.luthier.shared.authorization.Roles.CUSTOMER))
+        .build();
+    var header = JwsHeader.with(MacAlgorithm.HS256).build();
+    return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+  }
+
+  @Override
+  public long customerExpirationInSeconds() {
+    return customerExpirationInHours * 3600;
   }
 
   @Override

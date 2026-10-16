@@ -16,6 +16,7 @@ teste que a cobre. Itens "Aceito" são riscos conhecidos com mitigação parcial
 | Token de reset **não** passa pelo outbox (seria gravado em claro em `event_publication`) | **Corrigido nesta etapa** — listener síncrono em `NotificationListeners` |
 | Usuário/luthieria desativados não renovam sessão; troca de papel revoga refresh tokens | OK |
 | Rate limit por IP em `/auth/*` (5/min) e `/portal/*` (30/min) | OK — `RateLimitFilter` |
+| Área do cliente: código de 6 dígitos guardado como HMAC (chave do servidor), uso único, 5 tentativas, 72h/10 min; resposta igual para telefone inexistente; JWT CLIENTE sem acesso a rotas do balcão | OK — `CustomerAreaTest` |
 | `/auth/register` revela se um e-mail já existe (409) | **Aceito** — necessário para UX de cadastro; mitigado pelo rate limit |
 | Rate limit em memória (por instância) | **Aceito** — com mais de uma réplica, migrar para Bucket4j + Redis |
 | Bloqueio por conta após N falhas (além do limite por IP) | **Pendente** — recomendado antes de abrir para o público |

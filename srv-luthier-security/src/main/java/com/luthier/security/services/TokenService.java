@@ -9,4 +9,9 @@ public interface TokenService {
   String generate(UserEntity user);
 
   long expirationInSeconds();
+
+  /** JWT da área do cliente: papel CLIENTE, tenant (tid) e cliente (cid). Sem refresh token. */
+  String generateForCustomer(java.util.UUID tenantId, java.util.UUID customerId, String phone);
+
+  long customerExpirationInSeconds();
 }

@@ -54,6 +54,7 @@ Admin inicial em dev: `admin@luthieria.local` / `dev-admin-12345`. Novas luthier
 | `JWT_SECRET` (≥ 32 bytes), `ADMIN_SENHA` (≥ 12) | Obrigatórios, vindos de cofre |
 | `CORS_ALLOWED_ORIGINS`, `FRONTEND_URL` | Front-end |
 | `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` | SMTP (sem isso e-mails ficam registrados como não enviados) |
+| `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TOKEN` | WhatsApp Cloud API (Meta): envio automático do acesso do cliente. Templates em `docs/api.md` |
 | `MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT`, `TRACING_SAMPLING` | Traces OTLP |
 | `RETENTION_NOTIFICATION_DAYS`, `RETENTION_AUDIT_DAYS` | Retenção LGPD |
 

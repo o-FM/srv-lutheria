@@ -2,7 +2,9 @@ package com.luthier;
 
 import static com.luthier.support.ApiClient.auth;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -84,9 +86,10 @@ class PrivacyAndSecurityTest {
     mvc.perform(auth(post("/service-orders/" + order + "/status"), admin)
         .content("{\"status\":\"orcamento\"}"));
     mvc.perform(auth(post("/service-orders/" + order + "/quote/send"), admin));
+    // Mensagem de orçamento (balcão) + OS aberta e código (API do WhatsApp, desligada no teste)
     await().atMost(Duration.ofSeconds(10)).untilAsserted(() ->
         mvc.perform(auth(get("/notifications?channel=whatsapp"), admin))
-            .andExpect(jsonPath("$.totalElements").value(1)));
+            .andExpect(jsonPath("$.totalElements").value(3)));
 
     mvc.perform(auth(post("/customers/" + customer + "/anonymize"), admin))
         .andExpect(status().isNoContent());
@@ -99,8 +102,8 @@ class PrivacyAndSecurityTest {
         .andExpect(jsonPath("$.serviceOrders.length()").value(1));
     await().atMost(Duration.ofSeconds(10)).untilAsserted(() ->
         mvc.perform(auth(get("/notifications?channel=whatsapp"), admin))
-            .andExpect(jsonPath("$.content[0].recipient").doesNotExist())
-            .andExpect(jsonPath("$.content[0].actionUrl").doesNotExist()));
+            .andExpect(jsonPath("$.content[*].recipient", everyItem(nullValue())))
+            .andExpect(jsonPath("$.content[*].actionUrl", everyItem(nullValue()))));
     mvc.perform(auth(get("/audit-logs"), admin))
         .andExpect(jsonPath("$.content[*].action", hasItem("CUSTOMER_ANONYMIZED")));
   }

@@ -37,6 +37,9 @@ logging:
 
 luthieria:
   frontend-url: http://localhost:3000
+  # Sem a API do WhatsApp em dev: o código de acesso do cliente aparece no log
+  whatsapp:
+    log-codes: true
   admin:
     senha: ${ADMIN_SENHA:dev-admin-12345}
   jwt:

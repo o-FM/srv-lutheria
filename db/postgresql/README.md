@@ -6,7 +6,7 @@ aplicação, revisão do modelo). Testados no PostgreSQL 17; compatíveis com 15
 | Arquivo | O que faz | Executar como |
 |---|---|---|
 | `01_create_database.sql` | Cria o usuário `luthieria_app` e o banco `luthieria` (UTF-8) | superusuário (`postgres`) |
-| `02_schema.sql` | Cria as 18 tabelas, índices e restrições (numa transação) | `luthieria_app`, no banco `luthieria` |
+| `02_schema.sql` | Cria as 19 tabelas, índices e restrições (numa transação) | `luthieria_app`, no banco `luthieria` |
 | `99_drop_all.sql` | **Apaga tudo** (só dev/homologação) | `luthieria_app` |
 
 ```bash
@@ -17,7 +17,7 @@ psql -h localhost -U luthieria_app -d luthieria -f db/postgresql/02_schema.sql
 ## Relação com o Flyway
 
 A aplicação **já cria e evolui o schema sozinha** pelas migrations Flyway de cada módulo
-(`srv-luthier-*/src/main/resources/db/migration`, versões 1.0 a 4.2). O `02_schema.sql` é a
+(`srv-luthier-*/src/main/resources/db/migration`, versões 1.0 a 4.3). O `02_schema.sql` é a
 consolidação dessas migrations no estado atual — o schema resultante é idêntico (conferido coluna
 a coluna, restrições e índices).
 
@@ -29,10 +29,10 @@ Escolha **um** dos caminhos:
 
    ```bash
    SPRING_FLYWAY_BASELINE_ON_MIGRATE=true
-   SPRING_FLYWAY_BASELINE_VERSION=4.2
+   SPRING_FLYWAY_BASELINE_VERSION=4.3
    ```
 
-   Migrations futuras (V4.3 em diante) continuam sendo aplicadas normalmente pelo Flyway.
+   Migrations futuras (V4.4 em diante) continuam sendo aplicadas normalmente pelo Flyway.
 
 Ao criar uma migration nova num módulo, atualize também o `02_schema.sql` e a versão de baseline
 acima.
@@ -52,7 +52,7 @@ service_order_tb ─┬─ service_order_item_tb
                   └─ payment_tb
 service_order_counter_tb  (numeração por luthieria)
 notification_tb                              (notification)
-audit_log_tb, refresh_token_tb, password_reset_token_tb
+audit_log_tb, refresh_token_tb, password_reset_token_tb, customer_access_code_tb
 event_publication          (outbox do Spring Modulith)
 ```
 

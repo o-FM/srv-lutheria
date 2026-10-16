@@ -1,5 +1,6 @@
 package com.luthier.security.jobs;
 
+import com.luthier.security.domain.repositories.CustomerAccessCodeRepository;
 import com.luthier.security.domain.repositories.PasswordResetTokenRepository;
 import com.luthier.security.domain.repositories.RefreshTokenRepository;
 import jakarta.transaction.Transactional;
@@ -18,11 +19,14 @@ public class TokenCleanupJob {
 
   private final RefreshTokenRepository refreshTokenRepository;
   private final PasswordResetTokenRepository resetTokenRepository;
+  private final CustomerAccessCodeRepository accessCodeRepository;
 
   public TokenCleanupJob(RefreshTokenRepository refreshTokenRepository,
-      PasswordResetTokenRepository resetTokenRepository) {
+      PasswordResetTokenRepository resetTokenRepository,
+      CustomerAccessCodeRepository accessCodeRepository) {
     this.refreshTokenRepository = refreshTokenRepository;
     this.resetTokenRepository = resetTokenRepository;
+    this.accessCodeRepository = accessCodeRepository;
   }
 
   @Scheduled(cron = "0 0 3 * * *", zone = "America/Sao_Paulo")
@@ -31,7 +35,9 @@ public class TokenCleanupJob {
     var cutoff = Instant.now().minus(Duration.ofDays(7));
     int refresh = refreshTokenRepository.deleteExpiredBefore(cutoff);
     int reset = resetTokenRepository.deleteExpiredBefore(cutoff);
-    log.info("Limpeza de tokens: {} refresh, {} reset removidos", refresh, reset);
+    int access = accessCodeRepository.deleteExpiredBefore(cutoff);
+    log.info("Limpeza de tokens: {} refresh, {} reset, {} códigos de cliente removidos",
+        refresh, reset, access);
   }
 }
 

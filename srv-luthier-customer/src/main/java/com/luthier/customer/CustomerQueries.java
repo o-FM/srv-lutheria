@@ -18,6 +18,9 @@ public interface CustomerQueries {
 
   long countActive();
 
+  /** Cliente ativo com este telefone (só dígitos), na luthieria atual. */
+  Optional<CustomerSummary> findByPhone(String phoneDigits);
+
   /**
    * LGPD (portabilidade/acesso): todos os dados pessoais do cliente, SEM máscara, para entrega
    * ao próprio titular. Inclui clientes inativos.

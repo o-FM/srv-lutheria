@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS
     stock_movement_tb, product_tb,
     instrument_tb, customer_tb,
     notification_tb, event_publication,
-    audit_log_tb, password_reset_token_tb, refresh_token_tb, user_tb, tenant_tb,
+    audit_log_tb, customer_access_code_tb, password_reset_token_tb, refresh_token_tb, user_tb, tenant_tb,
     flyway_schema_history
     CASCADE;
 COMMIT;

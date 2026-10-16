@@ -37,6 +37,9 @@ luthieria:
     email: ${ADMIN_EMAIL:admin@luthieria.local}
     senha: ${ADMIN_SENHA}
   frontend-url: ${FRONTEND_URL:https://app.luthieria.com.br}
+  whatsapp:
+    phone-number-id: ${WHATSAPP_PHONE_NUMBER_ID:}
+    token: ${WHATSAPP_TOKEN:}
   retention:
     notification-days: ${RETENTION_NOTIFICATION_DAYS:365}
     audit-days: ${RETENTION_AUDIT_DAYS:1825}
