@@ -4,6 +4,7 @@ import com.luthier.customer.CustomerQueries;
 import com.luthier.service.ServiceOrderStatusChanged;
 import com.luthier.service.domain.entities.ServiceOrderEntity;
 import com.luthier.service.domain.records.PortalOrderResponse;
+import com.luthier.service.domain.repositories.OrderPhotoRepository;
 import com.luthier.service.domain.repositories.ServiceOrderRepository;
 import com.luthier.service.services.ClientAreaService;
 import com.luthier.shared.errors.NotFoundException;
@@ -24,12 +25,14 @@ public class ClientAreaServiceImpl implements ClientAreaService {
   private final ServiceOrderRepository orders;
   private final CustomerQueries customers;
   private final ApplicationEventPublisher events;
+  private final OrderPhotoRepository photos;
 
   public ClientAreaServiceImpl(ServiceOrderRepository orders, CustomerQueries customers,
-      ApplicationEventPublisher events) {
+      ApplicationEventPublisher events, OrderPhotoRepository photos) {
     this.orders = orders;
     this.customers = customers;
     this.events = events;
+    this.photos = photos;
   }
 
   @Override
@@ -85,7 +88,8 @@ public class ClientAreaServiceImpl implements ClientAreaService {
         .map(CustomerQueries.CustomerSummary::name).orElse(null);
     var instrument = customers.findInstrument(order.getInstrumentId())
         .map(i -> i.brand() + " " + i.model()).orElse(null);
-    return PortalOrderResponse.from(order, name, instrument);
+    return PortalOrderResponse.from(order, name, instrument,
+        photos.listByOrder(order.getId()));
   }
 
   private void publish(ServiceOrderEntity order, String previous) {
