@@ -1,6 +1,8 @@
 package com.luthier.service.services;
 
+import com.luthier.service.domain.records.PhotoContent;
 import com.luthier.service.domain.records.PortalOrderResponse;
+import java.util.UUID;
 
 /**
  * Portal do cliente: acesso público pelo token da OS (sem login). Não tem @PreAuthorize de
@@ -13,4 +15,6 @@ public interface CustomerPortalService {
   PortalOrderResponse approveQuote(String token);
 
   PortalOrderResponse rejectQuote(String token, String reason);
+
+  PhotoContent photo(String token, UUID photoId);
 }

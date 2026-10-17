@@ -3,7 +3,9 @@ package com.luthier.service.services.impl;
 import com.luthier.customer.CustomerQueries;
 import com.luthier.service.ServiceOrderStatusChanged;
 import com.luthier.service.domain.entities.ServiceOrderEntity;
+import com.luthier.service.domain.records.PhotoContent;
 import com.luthier.service.domain.records.PortalOrderResponse;
+import com.luthier.service.domain.repositories.OrderPhotoRepository;
 import com.luthier.service.domain.repositories.ServiceOrderRepository;
 import com.luthier.service.services.CustomerPortalService;
 import com.luthier.shared.errors.NotFoundException;
@@ -48,6 +50,11 @@ public class CustomerPortalServiceImpl implements CustomerPortalService {
     return inTenantOf(token, () -> actions.reject(token, reason));
   }
 
+  @Override
+  public PhotoContent photo(String token, UUID photoId) {
+    return inTenantOf(token, () -> actions.photo(token, photoId));
+  }
+
   private <T> T inTenantOf(String token, Supplier<T> action) {
     // Mesmo que um usuário logado abra o portal, o tenant é sempre o da OS dona do token
     var tenantId = TenantContext.callAsPlatform(() -> lookup.tenantOf(token));
@@ -77,9 +84,11 @@ public class CustomerPortalServiceImpl implements CustomerPortalService {
     private final ServiceOrderRepository repository;
     private final CustomerQueries customers;
     private final ApplicationEventPublisher events;
+    private final OrderPhotoRepository photos;
 
     Actions(ServiceOrderRepository repository, CustomerQueries customers,
-        ApplicationEventPublisher events) {
+        ApplicationEventPublisher events, OrderPhotoRepository photos) {
+      this.photos = photos;
       this.repository = repository;
       this.customers = customers;
       this.events = events;
@@ -110,6 +119,14 @@ public class CustomerPortalServiceImpl implements CustomerPortalService {
       return toResponse(order);
     }
 
+    @Transactional(readOnly = true)
+    public PhotoContent photo(String token, UUID photoId) {
+      var order = find(token);
+      return photos.findByIdAndOrderId(photoId, order.getId())
+          .map(p -> new PhotoContent(p.getContentType(), p.getData()))
+          .orElseThrow(() -> new NotFoundException("Photo not found!"));
+    }
+
     private ServiceOrderEntity find(String token) {
       return repository.findByTrackingToken(token)
           .orElseThrow(() -> new NotFoundException("Order not found!"));
@@ -120,7 +137,8 @@ public class CustomerPortalServiceImpl implements CustomerPortalService {
           .map(CustomerQueries.CustomerSummary::name).orElse(null);
       var instrument = customers.findInstrument(order.getInstrumentId())
           .map(i -> i.brand() + " " + i.model()).orElse(null);
-      return PortalOrderResponse.from(order, name, instrument);
+      return PortalOrderResponse.from(order, name, instrument,
+          photos.listByOrder(order.getId()));
     }
 
     private void publish(ServiceOrderEntity order, String previous) {

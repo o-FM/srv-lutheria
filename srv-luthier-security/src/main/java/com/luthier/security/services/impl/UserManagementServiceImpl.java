@@ -3,12 +3,16 @@ package com.luthier.security.services.impl;
 import com.luthier.security.domain.entities.UserEntity;
 import com.luthier.security.domain.enums.Profile;
 import com.luthier.security.domain.records.CreateUserRequest;
-import com.luthier.security.domain.records.UserPreferences;
+import com.luthier.security.domain.records.AccountUpdateResponse;
+import com.luthier.security.domain.records.UpdateMyAccountRequest;
+import com.luthier.security.domain.records.TokenResponse;
 import com.luthier.security.domain.records.UserResponse;
 import com.luthier.security.domain.repositories.RefreshTokenRepository;
 import com.luthier.security.domain.repositories.UserRepository;
+import com.luthier.shared.errors.BadRequestException;
 import com.luthier.shared.errors.ConflictException;
 import com.luthier.shared.errors.NotFoundException;
+import com.luthier.security.services.AuthService;
 import com.luthier.security.services.UserManagementService;
 import com.luthier.shared.audit.AuditEvent;
 import com.luthier.shared.tenancy.TenantContext;
@@ -16,6 +20,7 @@ import com.luthier.shared.validation.Cpf;
 import com.luthier.shared.validation.Phone;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -31,10 +36,12 @@ public class UserManagementServiceImpl implements UserManagementService {
   private final RefreshTokenRepository refreshTokenRepository;
   private final PasswordEncoder passwordEncoder;
   private final ApplicationEventPublisher events;
+  private final AuthService authService;
 
   public UserManagementServiceImpl(UserRepository userRepository,
       RefreshTokenRepository refreshTokenRepository, PasswordEncoder passwordEncoder,
-      ApplicationEventPublisher events) {
+      ApplicationEventPublisher events, AuthService authService) {
+    this.authService = authService;
     this.userRepository = userRepository;
     this.refreshTokenRepository = refreshTokenRepository;
     this.passwordEncoder = passwordEncoder;
@@ -81,11 +88,52 @@ public class UserManagementServiceImpl implements UserManagementService {
   }
 
   @Override
-  public UserResponse updateMyPreferences(UUID userId, UserPreferences preferences) {
+  public AccountUpdateResponse updateMe(UUID userId, UpdateMyAccountRequest request) {
     var user = find(userId);
-    user.changeAppearance(preferences.themeMode(), preferences.themeAccent(),
-        preferences.themeTone());
-    return UserResponse.from(user);
+    if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+      events.publishEvent(AuditEvent.of("ACCOUNT_UPDATE_DENIED", "user", userId,
+          "senha atual incorreta"));
+      throw new BadRequestException("Senha atual incorreta");
+    }
+
+    var changed = new ArrayList<String>();
+    var credentialsChanged = false;
+
+    if (request.email() != null && !request.email().isBlank()) {
+      var email = request.email().strip().toLowerCase(Locale.ROOT);
+      if (!email.equalsIgnoreCase(user.getEmail())) {
+        if (userRepository.existsByEmailIgnoreCase(email)) {
+          throw new ConflictException("Email already exists");
+        }
+        user.changeEmail(email);
+        changed.add("email");
+        credentialsChanged = true;
+      }
+    }
+    if (request.phone() != null) {
+      var phone = Phone.digits(request.phone());
+      if (phone != null && (phone.length() < 10 || phone.length() > 11)) {
+        throw new BadRequestException("Telefone inválido");
+      }
+      user.changePhone(phone);
+      changed.add("telefone");
+    }
+    if (request.newPassword() != null && !request.newPassword().isBlank()) {
+      user.changePassword(passwordEncoder.encode(request.newPassword()));
+      changed.add("senha");
+      credentialsChanged = true;
+    }
+
+    TokenResponse session = null;
+    if (credentialsChanged) {
+      // Sessões abertas em outros aparelhos não sobrevivem à troca de e-mail/senha
+      refreshTokenRepository.revokeAllByUser(user.getUuid(), Instant.now());
+      userRepository.flush();
+      session = authService.startSession(user);
+    }
+    events.publishEvent(AuditEvent.of("ACCOUNT_UPDATED", "user", userId,
+        String.join(", ", changed)));
+    return new AccountUpdateResponse(UserResponse.from(user), session);
   }
 
   @Override

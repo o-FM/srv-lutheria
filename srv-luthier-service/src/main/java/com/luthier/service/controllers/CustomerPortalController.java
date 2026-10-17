@@ -5,6 +5,8 @@ import com.luthier.service.domain.records.PortalOrderResponse;
 import com.luthier.service.services.CustomerPortalService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import java.util.UUID;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +32,12 @@ public class CustomerPortalController {
   @GetMapping
   public PortalOrderResponse view(@PathVariable @Pattern(regexp = TOKEN) String token) {
     return portal.view(token);
+  }
+
+  @GetMapping("/photos/{photoId}")
+  public ResponseEntity<byte[]> photo(@PathVariable @Pattern(regexp = TOKEN) String token,
+      @PathVariable UUID photoId) {
+    return OrderPhotoController.image(portal.photo(token, photoId));
   }
 
   @PostMapping("/quote/approve")

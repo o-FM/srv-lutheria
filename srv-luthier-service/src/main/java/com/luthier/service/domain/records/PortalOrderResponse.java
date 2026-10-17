@@ -14,10 +14,11 @@ public record PortalOrderResponse(java.util.UUID id, int orderNumber, String cus
                                   LocalDate estimatedDeliveryDate,
                                   List<OrderResponse.ServiceItem> services,
                                   List<OrderResponse.Part> parts, OrderResponse.Quote quote,
-                                  List<OrderResponse.Timeline> timeline) {
+                                  List<OrderResponse.Timeline> timeline,
+                                  List<PhotoResponse> photos) {
 
   public static PortalOrderResponse from(ServiceOrderEntity o, String customerName,
-      String instrument) {
+      String instrument, List<PhotoResponse> photos) {
     var firstName = customerName == null ? null : customerName.strip().split("\\s+")[0];
     return new PortalOrderResponse(o.getId(), o.getOrderNumber(), firstName, instrument, o.getStatus(),
         o.getStatus().getLabel(), o.getEstimatedDeliveryDate(),
@@ -27,6 +28,9 @@ public record PortalOrderResponse(java.util.UUID id, int orderNumber, String cus
         OrderResponse.timeline(o.getTimeline()).stream()
             .map(t -> new OrderResponse.Timeline(t.id(), t.timestamp(), t.type(), t.title(),
                 null, null))
+            .toList(),
+        photos.stream()
+            .map(p -> new PhotoResponse(p.id(), p.tag(), p.caption(), p.timestamp(), null))
             .toList());
   }
 }

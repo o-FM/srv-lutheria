@@ -83,6 +83,9 @@ class RegistrationFlowTest {
 
     mvc.perform(auth(get("/customers/" + id), tokenA))
         .andExpect(jsonPath("$.instruments.length()").value(1));
+    // A listagem também traz os instrumentos (tela de clientes e abertura de OS)
+    mvc.perform(auth(get("/customers"), tokenA))
+        .andExpect(jsonPath("$.content[0].instruments[0].brand").value("Giannini"));
   }
 
   @Test

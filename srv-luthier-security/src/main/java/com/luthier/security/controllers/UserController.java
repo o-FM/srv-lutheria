@@ -2,7 +2,8 @@ package com.luthier.security.controllers;
 
 import com.luthier.security.domain.records.CreateUserRequest;
 import com.luthier.security.domain.records.UpdateProfileRequest;
-import com.luthier.security.domain.records.UserPreferences;
+import com.luthier.security.domain.records.AccountUpdateResponse;
+import com.luthier.security.domain.records.UpdateMyAccountRequest;
 import com.luthier.security.domain.records.UserResponse;
 import com.luthier.security.services.UserManagementService;
 import jakarta.validation.Valid;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -49,12 +49,10 @@ public class UserController {
     return userManagementService.me(UUID.fromString(jwt.getClaimAsString("uid")));
   }
 
-  /** Preferências de aparência do usuário logado (modo, cor de destaque, tom). */
-  @PutMapping("/me/preferences")
-  public UserResponse updateMyPreferences(@AuthenticationPrincipal Jwt jwt,
-      @Valid @RequestBody UserPreferences preferences) {
-    return userManagementService.updateMyPreferences(
-        UUID.fromString(jwt.getClaimAsString("uid")), preferences);
+  @PatchMapping("/me")
+  public AccountUpdateResponse updateMe(@AuthenticationPrincipal Jwt jwt,
+      @Valid @RequestBody UpdateMyAccountRequest request) {
+    return userManagementService.updateMe(UUID.fromString(jwt.getClaimAsString("uid")), request);
   }
 
   @PatchMapping("/{id}/profile")

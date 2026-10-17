@@ -31,8 +31,18 @@ mvn install                                   # build + todos os testes
 java -jar srv-luthier-app/target/srv-luthier-app-1.0.0-SNAPSHOT.jar   # perfil dev: H2, porta 8080
 
 # Ambiente completo: PostgreSQL, app (perfil prod), Mailpit, Prometheus e Jaeger
-mvn install -DskipTests && docker compose up --build
+docker compose up --build        # o Dockerfile compila o projeto (não precisa de Maven local)
 ```
+
+Front em dev (repositório `srv-lutheria-front`): `npm run dev` em http://localhost:3000, com
+`/api` encaminhado para esta API em `localhost:8080`.
+
+## Produção
+
+Deploy em uma VM (Caddy com HTTPS automático + API + PostgreSQL + backup diário) com
+`deploy/docker-compose.prod.yml`. Passo a passo, atualização, backup e restauração em
+[deploy/README.md](deploy/README.md). As imagens são publicadas no GHCR pelo workflow
+`Imagem Docker` a cada push na `develop`.
 
 Admin inicial em dev: `admin@luthieria.local` / `dev-admin-12345`. Novas luthierias:
 `POST /auth/register`.
@@ -91,6 +101,7 @@ Logins: `armando.luthier@oficina.com` (ou CPF `123.456.789-09`) / `Luthier@2026`
 ## Documentação
 
 - [API, multi-tenancy e ciclo da OS](docs/api.md) · [OpenAPI](docs/openapi.json)
+- [Deploy em produção](deploy/README.md)
 - [Revisão de segurança e LGPD](docs/security-review.md)
 - [Scripts PostgreSQL (criação manual do banco)](db/postgresql/README.md)
 - [Testes de carga](load-tests/README.md)

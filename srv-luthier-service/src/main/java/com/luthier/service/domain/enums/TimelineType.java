@@ -13,7 +13,8 @@ public enum TimelineType {
   QUOTE_REJECTED("quote_rejected"),
   SERVICE_DONE("service_done"),
   PAYMENT_RECEIVED("payment_received"),
-  NOTE_ADDED("note_added");
+  NOTE_ADDED("note_added"),
+  PHOTO_ADDED("photo_added");
 
   private final String value;
 

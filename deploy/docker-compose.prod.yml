@@ -1,0 +1,113 @@
+# Produção em UMA máquina (Lightsail, EC2, GCE, Azure VM, VPS...):
+#   Caddy (HTTPS + front + proxy /api)  ->  API Spring Boot  ->  PostgreSQL
+#   + backup diário do banco (pg_dump) com retenção.
+#
+# Uso (no servidor, com os dois repositórios lado a lado):
+#   cp .env.example .env && nano .env        # preencher segredos e domínio
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Dimensionado para 2 GB de RAM; com 4 GB dá para subir os limites abaixo.
+name: luthieria
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: luthieria
+      POSTGRES_USER: luthieria
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    command:
+      - postgres
+      - -c
+      - shared_buffers=128MB
+      - -c
+      - effective_cache_size=384MB
+      - -c
+      - work_mem=4MB
+      - -c
+      - maintenance_work_mem=64MB
+      - -c
+      - max_connections=40
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U luthieria -d luthieria"]
+      interval: 10s
+      retries: 10
+    mem_limit: 512m
+    networks: [internal]
+
+  app:
+    image: ${API_IMAGE:-ghcr.io/o-fm/srv-lutheria:latest}
+    build: ..
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://postgres:5432/luthieria
+      DB_USERNAME: luthieria
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_POOL_SIZE: "10"
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?defina ADMIN_EMAIL no .env}
+      ADMIN_SENHA: ${ADMIN_SENHA:?defina ADMIN_SENHA no .env}
+      FRONTEND_URL: https://${DOMAIN}
+      CORS_ALLOWED_ORIGINS: https://${DOMAIN}
+      # Sem coletor OTLP no servidor: nenhum trace é amostrado/exportado
+      TRACING_SAMPLING: "0.0"
+    # SMTP fica em smtp.env (opcional): sem ele os e-mails só são registrados como não enviados
+    env_file:
+      - path: ./smtp.env
+        required: false
+    mem_limit: 1g
+    networks: [internal]
+
+  caddy:
+    image: ${WEB_IMAGE:-ghcr.io/o-fm/srv-lutheria-front:latest}
+    build: ${FRONT_PATH:-../../srv-lutheria-front}
+    restart: unless-stopped
+    depends_on: [app]
+    environment:
+      DOMAIN: ${DOMAIN:?defina DOMAIN no .env}
+      ACME_EMAIL: ${ACME_EMAIL:?defina ACME_EMAIL no .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    mem_limit: 128m
+    networks: [internal]
+
+  backup:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGDATABASE: luthieria
+      PGUSER: luthieria
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      BACKUP_HOUR: ${BACKUP_HOUR:-3}
+      TZ: ${TZ:-America/Sao_Paulo}
+    volumes:
+      - ./backup.sh:/backup.sh:ro
+      - ${BACKUP_DIR:-./backups}:/backups
+    entrypoint: ["/bin/sh", "/backup.sh"]
+    mem_limit: 128m
+    networks: [internal]
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:

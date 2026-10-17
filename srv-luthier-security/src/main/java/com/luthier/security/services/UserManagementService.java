@@ -3,7 +3,8 @@ package com.luthier.security.services;
 import com.luthier.shared.authorization.Access;
 import com.luthier.security.domain.enums.Profile;
 import com.luthier.security.domain.records.CreateUserRequest;
-import com.luthier.security.domain.records.UserPreferences;
+import com.luthier.security.domain.records.AccountUpdateResponse;
+import com.luthier.security.domain.records.UpdateMyAccountRequest;
 import com.luthier.security.domain.records.UserResponse;
 import java.util.List;
 import java.util.UUID;
@@ -21,9 +22,8 @@ public interface UserManagementService {
   @PreAuthorize(Access.ANY_STAFF)
   UserResponse me(UUID userId);
 
-  /** Cada usuário altera só as próprias preferências (o id vem do token, nunca do request). */
   @PreAuthorize(Access.ANY_STAFF)
-  UserResponse updateMyPreferences(UUID userId, UserPreferences preferences);
+  AccountUpdateResponse updateMe(UUID userId, UpdateMyAccountRequest request);
 
   @PreAuthorize(Access.ADMIN)
   UserResponse changeProfile(UUID id, Profile profile);
