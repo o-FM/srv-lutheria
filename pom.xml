@@ -29,7 +29,7 @@
 
 	<properties>
 		<java.version>21</java.version>
-		<spring-modulith.version>2.1.1</spring-modulith.version>
+		<spring-modulith.version>2.1.2</spring-modulith.version>
 		<springdoc.version>3.1.0</springdoc.version>
 		<mapstruct.version>1.6.3</mapstruct.version>
 		<archunit.version>1.5.1</archunit.version>
