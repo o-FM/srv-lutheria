@@ -304,7 +304,7 @@ Nenhuma revisão encontrou IDOR entre tenants, SQL injection, consulta nativa qu
 - **Sugestão:** projetar a listagem com os totais calculados no banco (subqueries `sum(...)` por `order_id`). Como mitigação rápida, usar `@BatchSize(size = 50)` nas coleções ou `hibernate.default_batch_fetch_size=50`.
 
 <a id="srv-03"></a>
-### [ALTO] SRV-03: o relatório financeiro carrega todo o histórico
+### [ALTO] SRV-03: o relatório financeiro carrega todo o histórico ✔
 - **Arquivo:** `srv-luthier-service/src/main/java/com/luthier/service/domain/repositories/ServiceOrderRepository.java:66-73`, `srv-luthier-service/src/main/java/com/luthier/service/services/impl/ReportServiceImpl.java:100-103`
 - **Problema:** `findBillable()` traz todas as OS em `EM_EXECUCAO`, `PRONTO` e `ENTREGUE`, sem limite, e soma `balance()` em Java, com N+1 nas coleções. Como `ENTREGUE` nunca sai do filtro, o custo cresce com toda a história da oficina. Um LUTHIER pode repetir a chamada e degradar o serviço.
 - **Sugestão:** calcular o "a receber" com uma agregação em JPQL, que mantém o filtro de tenant (SQL nativo não mantém), usando subqueries de soma de mão de obra e de peças menos `discount` e `paidAmount`. Também é possível materializar `total_amount` na OS e atualizá-lo na entidade.

@@ -75,14 +75,27 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrderEntity
       """)
   long countDelivered(@Param("from") java.time.Instant from, @Param("to") java.time.Instant to);
 
-  /** A receber: OS prontas/entregues com saldo em aberto (total calculado no Java). */
+  /**
+   * A receber (SRV-03): soma, no banco, dos saldos positivos das OS em execução, prontas ou
+   * entregues. Saldo = mão de obra + peças - desconto - pago. JPQL mantém o filtro de tenant.
+   */
   @Query("""
-      select o from ServiceOrderEntity o
+      select coalesce(sum(
+          coalesce((select sum(i.laborPrice) from OrderServiceItemEntity i where i.order = o), 0bd)
+        + coalesce((select sum(p.unitPrice * p.quantity) from OrderPartEntity p
+                    where p.order = o), 0bd)
+        - o.discount - o.paidAmount), 0bd)
+      from ServiceOrderEntity o
       where o.status in (com.luthier.service.domain.enums.OrderStatus.PRONTO,
                          com.luthier.service.domain.enums.OrderStatus.ENTREGUE,
                          com.luthier.service.domain.enums.OrderStatus.EM_EXECUCAO)
+        and coalesce((select sum(i2.laborPrice) from OrderServiceItemEntity i2
+                      where i2.order = o), 0bd)
+          + coalesce((select sum(p2.unitPrice * p2.quantity) from OrderPartEntity p2
+                      where p2.order = o), 0bd)
+          - o.discount - o.paidAmount > 0
       """)
-  List<ServiceOrderEntity> findBillable();
+  BigDecimal sumReceivable();
 
   @Query("select coalesce(sum(o.paidAmount), 0) from ServiceOrderEntity o")
   BigDecimal sumPaid();

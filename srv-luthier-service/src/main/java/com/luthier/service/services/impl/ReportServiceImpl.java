@@ -2,7 +2,6 @@ package com.luthier.service.services.impl;
 
 import com.luthier.customer.CustomerQueries;
 import com.luthier.product.ProductQueries;
-import com.luthier.service.domain.entities.ServiceOrderEntity;
 import com.luthier.service.domain.enums.OrderStatus;
 import com.luthier.service.domain.enums.PaymentMethod;
 import com.luthier.service.domain.records.ReportResponses.Dashboard;
@@ -97,10 +96,7 @@ public class ReportServiceImpl implements ReportService {
     var delivered = orders.countDelivered(fromInstant, toInstant);
     var averageTicket = paymentsCount == 0 ? BigDecimal.ZERO
         : received.divide(BigDecimal.valueOf(paymentsCount), 2, RoundingMode.HALF_UP);
-    var receivable = orders.findBillable().stream()
-        .map(ServiceOrderEntity::balance)
-        .filter(b -> b.signum() > 0)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    var receivable = orders.sumReceivable();
 
     return new Financial(start, end, received, byMethod, delivered, averageTicket, receivable);
   }
