@@ -54,6 +54,14 @@ public enum OrderStatus {
     return this == RECEBIDO || this == DIAGNOSTICO || this == ORCAMENTO;
   }
 
+  /**
+   * Pagamento só depois do orçamento aprovado (SRV-01, decisão em docs/correcoes.prd.md). Até lá
+   * os itens ainda mudam, e um valor pago poderia passar do total.
+   */
+  public boolean acceptsPayment() {
+    return this == EM_EXECUCAO || this == PRONTO || this == ENTREGUE;
+  }
+
   public boolean isOpen() {
     return this != ENTREGUE && this != CANCELADO;
   }

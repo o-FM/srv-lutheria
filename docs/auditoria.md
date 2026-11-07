@@ -290,6 +290,7 @@ Nenhuma revisão encontrou IDOR entre tenants, SQL injection, consulta nativa qu
 
 <a id="srv-01"></a>
 ### [ALTO] SRV-01: desconto e pagamentos podem deixar total ou saldo negativos ✔
+- **Status:** resolvido na branch `fix/srv-01-order-totals`. O desconto é conferido contra o subtotal antes de remover um item (409) e no envio do orçamento. Itens não podem ser removidos de OS com pagamento. O pagamento só é aceito em `em_execucao`, `pronto` ou `entregue`, decisão registrada em `docs/correcoes.prd.md`. Testes: `ServiceOrderEntityTest` e `ServiceOrderFlowTest`.
 - **Arquivo:** `srv-luthier-service/src/main/java/com/luthier/service/domain/entities/ServiceOrderEntity.java:159-164, 186-191, 205-211, 241-251, 273-290`
 - **Problema:**
   - **Desconto:** só `updateDetails` compara o desconto com o total (L207). `removeService` e `removePart` não fazem essa checagem. Se o usuário aplicar R$ 100 de desconto e depois remover itens, o desconto passa do subtotal e `grandTotal()` fica negativo. `sendQuote` (L241) só verifica se a lista está vazia, então o orçamento é enviado com valor negativo.

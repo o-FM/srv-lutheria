@@ -33,7 +33,7 @@ exportação LGPD. DELETE é exclusão lógica. Erros seguem RFC 9457 (`applicat
 | `/service-orders/{id}/parts` | Peças da OS | bancada |
 | `POST /service-orders/{id}/status` | Transição de status (`pronto` só bancada) | balcão |
 | `POST /service-orders/{id}/quote/send\|approve\|reject` | Orçamento | balcão |
-| `POST /service-orders/{id}/notes`, `/payments` | Observações e pagamentos | balcão |
+| `POST /service-orders/{id}/notes`, `/payments` | Observações e pagamentos (pagamento só a partir de `em_execucao`; antes disso, 409) | balcão |
 | `GET /portal/orders/{token}`, `POST .../quote/approve\|reject` | Portal do cliente sem senha | público (rate limit) |
 | `GET /reports/dashboard` | Tela "Hoje" | todos |
 | `GET /reports/financial?from=&to=` | Financeiro | ADMIN, LUTHIER |
@@ -51,6 +51,10 @@ recebido → diagnostico → orcamento → aguardando_aprovacao → em_execucao 
 cancelado: até em_execucao
 ```
 
+- Totais nunca ficam negativos: o desconto não passa do subtotal. Remover um serviço ou peça
+  que deixaria o desconto maior que o novo subtotal responde 409; reduza o desconto antes.
+- Pagamento só depois do orçamento aprovado (`em_execucao`, `pronto` ou `entregue`) e nunca
+  acima do saldo. Com pagamento registrado, itens não podem ser removidos.
 - Serviços/peças/desconto só mudam até `orcamento`. `aguardando_aprovacao` só via
   `quote/send`; `em_execucao` só pela aprovação (oficina ou portal).
 - `pronto` (somente LUTHIER/ADMIN) confere o saldo das peças e publica

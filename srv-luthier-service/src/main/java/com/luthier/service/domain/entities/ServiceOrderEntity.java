@@ -158,9 +158,11 @@ public class ServiceOrderEntity extends TenantScopedEntity {
 
   public void removeService(UUID itemId) {
     requireEditable();
-    if (!services.removeIf(s -> itemId.equals(s.getId()))) {
-      throw new NotFoundException("Service item not found!");
-    }
+    requireNoPayments();
+    var item = services.stream().filter(s -> itemId.equals(s.getId())).findFirst()
+        .orElseThrow(() -> new NotFoundException("Service item not found!"));
+    requireDiscountFitsAfterRemoving(item.getLaborPrice());
+    services.remove(item);
   }
 
   public void markServiceDone(UUID itemId, String user) {
@@ -185,9 +187,11 @@ public class ServiceOrderEntity extends TenantScopedEntity {
 
   public void removePart(UUID partId) {
     requireEditable();
-    if (!parts.removeIf(p -> partId.equals(p.getId()))) {
-      throw new NotFoundException("Part not found!");
-    }
+    requireNoPayments();
+    var part = parts.stream().filter(p -> partId.equals(p.getId())).findFirst()
+        .orElseThrow(() -> new NotFoundException("Part not found!"));
+    requireDiscountFitsAfterRemoving(part.total());
+    parts.remove(part);
   }
 
   // ---------------- dados gerais ----------------
@@ -197,17 +201,21 @@ public class ServiceOrderEntity extends TenantScopedEntity {
     if (!status.isOpen()) {
       throw new ConflictException("OS encerrada não pode ser alterada");
     }
+    // Valida o desconto ANTES de mudar qualquer campo, para a OS não ficar alterada pela metade
+    if (discount != null) {
+      requireEditable();
+      if (discount.compareTo(subtotal()) > 0) {
+        throw new BadRequestException("Desconto maior que o total da OS");
+      }
+    }
     if (priority != null) this.priority = priority;
     if (diagnosisNotes != null) this.diagnosisNotes = diagnosisNotes;
     if (technicianNotes != null) this.technicianNotes = technicianNotes;
     if (estimatedDeliveryDate != null) this.estimatedDeliveryDate = estimatedDeliveryDate;
     if (paymentTerms != null) this.paymentTerms = paymentTerms;
     if (discount != null) {
-      requireEditable();
-      if (discount.compareTo(laborTotal().add(partsTotal())) > 0) {
-        throw new BadRequestException("Desconto maior que o total da OS");
-      }
       this.discount = discount;
+      assertTotalsConsistent();
     }
   }
 
@@ -242,6 +250,7 @@ public class ServiceOrderEntity extends TenantScopedEntity {
     if (services.isEmpty() && parts.isEmpty()) {
       throw new BadRequestException("Orçamento sem serviços ou peças");
     }
+    assertTotalsConsistent();
     transition(OrderStatus.AGUARDANDO_APROVACAO);
     quoteStatus = QuoteStatus.PENDENTE;
     quoteSentAt = Instant.now();
@@ -274,6 +283,9 @@ public class ServiceOrderEntity extends TenantScopedEntity {
     if (status == OrderStatus.CANCELADO) {
       throw new ConflictException("OS cancelada não recebe pagamentos");
     }
+    if (!status.acceptsPayment()) {
+      throw new ConflictException("Pagamentos só depois da aprovação do orçamento");
+    }
     if (amount.signum() <= 0) {
       throw new BadRequestException("Valor deve ser maior que zero");
     }
@@ -300,8 +312,13 @@ public class ServiceOrderEntity extends TenantScopedEntity {
     return parts.stream().map(OrderPartEntity::total).reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
+  /** Mão de obra + peças, antes do desconto. */
+  public BigDecimal subtotal() {
+    return laborTotal().add(partsTotal());
+  }
+
   public BigDecimal grandTotal() {
-    return laborTotal().add(partsTotal()).subtract(discount);
+    return subtotal().subtract(discount);
   }
 
   public BigDecimal balance() {
@@ -323,6 +340,33 @@ public class ServiceOrderEntity extends TenantScopedEntity {
   private void requireEditable() {
     if (!status.isEditable()) {
       throw new ConflictException("Itens só podem ser alterados antes do envio do orçamento");
+    }
+  }
+
+  /**
+   * Invariantes dos totais (SRV-01): o desconto não passa do subtotal e o valor pago não passa do
+   * total. Assim, grandTotal() e balance() nunca ficam negativos.
+   */
+  private void assertTotalsConsistent() {
+    if (discount.compareTo(subtotal()) > 0) {
+      throw new ConflictException("Desconto maior que o subtotal da OS");
+    }
+    if (paidAmount.compareTo(grandTotal()) > 0) {
+      throw new ConflictException("Valor pago maior que o total da OS");
+    }
+  }
+
+  /** Confere ANTES de remover, para a coleção não ficar alterada quando a regra recusa. */
+  private void requireDiscountFitsAfterRemoving(BigDecimal itemTotal) {
+    if (discount.compareTo(subtotal().subtract(itemTotal)) > 0) {
+      throw new ConflictException("Remova ou reduza o desconto antes de remover este item");
+    }
+  }
+
+  /** Defesa: hoje inalcançável, porque pagamento só existe depois da aprovação (não editável). */
+  private void requireNoPayments() {
+    if (paidAmount.signum() > 0) {
+      throw new ConflictException("OS com pagamento registrado não pode ter itens removidos");
     }
   }
 

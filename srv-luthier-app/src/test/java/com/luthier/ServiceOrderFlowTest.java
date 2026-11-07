@@ -129,6 +129,47 @@ class ServiceOrderFlowTest {
         .andExpect(jsonPath("$.deliveredOrders").value(1));
   }
 
+  /** SRV-01: pagamento só depois do orçamento aprovado. */
+  @Test
+  void paymentBeforeQuoteApprovalIsRejected() throws Exception {
+    // com serviço de 180, o saldo comportaria o valor: o 409 vem só da regra de status
+    var orderId = api.create(admin, "/service-orders", """
+        {"customerId":"%s","instrumentId":"%s","reportedIssue":"Revisão geral",
+         "services":[{"catalogId":"%s"}]}""".formatted(customerId, instrumentId, catalogId));
+
+    payment(orderId, "10.00").andExpect(status().isConflict());
+    mvc.perform(auth(get("/service-orders/" + orderId), admin))
+        .andExpect(jsonPath("$.paidAmount").value(0))
+        .andExpect(jsonPath("$.payments", hasSize(0)));
+  }
+
+  /** SRV-01: remover item não pode deixar o desconto maior que o subtotal (total negativo). */
+  @Test
+  void removingAnItemBelowTheDiscountIsRejected() throws Exception {
+    // serviço 180 + peça 2 x 45 = 270; desconto 200 deixa total 70
+    var orderId = api.create(admin, "/service-orders", """
+        {"customerId":"%s","instrumentId":"%s","reportedIssue":"Revisão geral",
+         "services":[{"catalogId":"%s"}]}""".formatted(customerId, instrumentId, catalogId));
+    mvc.perform(auth(post("/service-orders/" + orderId + "/parts"), admin)
+            .content("{\"productId\":\"%s\",\"quantity\":2}".formatted(productId)))
+        .andExpect(status().isCreated());
+    mvc.perform(auth(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+            .patch("/service-orders/" + orderId), admin).content("{\"discount\":200}"))
+        .andExpect(jsonPath("$.totalAmount").value(70.00));
+    var order = mvc.perform(auth(get("/service-orders/" + orderId), admin))
+        .andReturn().getResponse().getContentAsString();
+    String partId = JsonPath.read(order, "$.parts[0].id");
+
+    // sem a peça, o subtotal seria 180 < desconto 200
+    mvc.perform(auth(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+            .delete("/service-orders/" + orderId + "/parts/" + partId), admin))
+        .andExpect(status().isConflict());
+
+    mvc.perform(auth(get("/service-orders/" + orderId), admin))
+        .andExpect(jsonPath("$.parts", hasSize(1)))
+        .andExpect(jsonPath("$.totalAmount").value(70.00));
+  }
+
   @Test
   void invalidTransitionsAreRejected() throws Exception {
     var orderId = newOrder();
