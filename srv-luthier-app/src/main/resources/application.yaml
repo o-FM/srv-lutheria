@@ -13,6 +13,14 @@ spring:
     hibernate:
       # O schema é responsabilidade do Flyway; o Hibernate só confere se bate com as entidades.
       ddl-auto: validate
+    properties:
+      hibernate:
+        # Mitiga N+1 em coleções LAZY (APP-04): carrega até 50 coleções/proxies por SELECT.
+        default_batch_fetch_size: 50
+        # Agrupa INSERT/UPDATE em lotes (IDs são UUID, então o batch funciona).
+        jdbc.batch_size: 50
+        order_inserts: true
+        order_updates: true
   flyway:
     enabled: true
     # Cada módulo traz suas migrations em db/migration/<modulo> dentro do próprio JAR.

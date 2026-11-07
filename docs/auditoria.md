@@ -447,7 +447,7 @@ Nenhuma revisão encontrou IDOR entre tenants, SQL injection, consulta nativa qu
 - **Problema:** é a defesa que falta contra SH-01, ou seja, contra INSERT com tenant `ROOT` ou tenant inexistente.
 - **Sugestão:** `alter table <tabela> add constraint fk_<tabela>_tenant foreign key (tenant_id) references tenant_tb (id);`. Se a FK for indesejada, para manter os módulos independentes para uma futura extração, use pelo menos `check (tenant_id <> '00000000-0000-0000-0000-000000000000')`.
 
-### [BAIXO] APP-04: sem configuração de batch do Hibernate
+### [BAIXO] APP-04: sem configuração de batch do Hibernate ✔
 - **Arquivo:** `srv-luthier-app/src/main/resources/application.yaml:11-15`
 - **Problema:** sem batch, nada mitiga o N+1 (SRV-02, SRV-10) nem o UPDATE linha a linha (NOT-04).
 - **Sugestão:**
