@@ -84,7 +84,8 @@ Cobertura: 3 + 3 + 4 + 3 + 10 + 19 + 23 = **65 achados**. O APP-04, que é BAIXO
 ### Fase 3: Integridade
 
 - **Status:** in-progress
-- **Plano:** `.claude/PRPs/plans/fase-3-integridade.plan.md`
+- **Plano:** `.claude/PRPs/plans/completed/fase-3-integridade.plan.md`
+- **Relatório:** `.claude/PRPs/reports/fase-3-integridade-report.md` (implementado nas 4 branches `fix/srv-01-order-totals`, `fix/sh-02-integrity-409`, `fix/app-01-no-default-profile` e `fix/pro-01-idempotent-stock-consumption`; a fase só fica `done` depois do merge)
 - **Achados:** SRV-01 (ALTO), PRO-01 (ALTO), SH-02 (MÉDIO), APP-01 (MÉDIO)
 - **Dependências:**
   - **Fase 2:** só o PRO-01 depende dela, porque usa a migration `V4_7` e a tabela nova precisa da FK de tenant. O SH-02 também passa a converter em 409 as violações das FKs criadas na fase 2.
