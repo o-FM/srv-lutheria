@@ -28,27 +28,31 @@ A auditoria encontrou falhas de segurança, de isolamento entre luthierias, de i
 
 ## Decisões de negócio pendentes
 
-> ⚠️ O pedido que gerou este PRD reservou um espaço para as decisões sobre SRV-01, SRV-05, SRV-06 e CUS-03, mas elas **não foram informadas**. As opções abaixo vêm da auditoria. Enquanto não houver decisão registrada aqui, os itens dependentes ficam **bloqueados**. O SRV-01 foi decidido em 2026-11-07. A fase 6 continua dependendo de SRV-05, SRV-06 e CUS-03.
+> ⚠️ O pedido que gerou este PRD reservou um espaço para as decisões sobre SRV-01, SRV-05, SRV-06 e CUS-03, mas elas **não foram informadas**. As opções abaixo vêm da auditoria. Enquanto não houver decisão registrada aqui, os itens dependentes ficam **bloqueados**. O SRV-01 foi decidido em 2026-11-07. SRV-05, SRV-06 e CUS-03 foram decididos em 2026-11-07, o que desbloqueia a fase 6.
 
 | ID | Pergunta | Opção A | Opção B | Decisão |
 |---|---|---|---|---|
 | SRV-01 | O que acontece quando uma edição deixaria o desconto maior que o subtotal ou o valor pago maior que o total? | Recusar a edição com 409, usando um `assertTotalsConsistent()` em `removeService`, `removePart`, `updateDetails` e `sendQuote` | Proibir a remoção de itens quando `paidAmount > 0` | **A e B juntas** (2026-11-07) |
 | SRV-01 | Em quais status a OS pode receber pagamento? | Qualquer status exceto `CANCELADO`, como hoje, protegido pela regra acima | Só depois do orçamento aprovado (a partir de `EM_EXECUCAO`) | **B: só em `EM_EXECUCAO`, `PRONTO` e `ENTREGUE`** (2026-11-07) |
-| SRV-05 | Sair de `AGUARDANDO_APROVACAO` por `changeStatus` sem resposta do cliente | Encerrar o orçamento automaticamente (`REJEITADO`, com motivo registrado) | Proibir a transição para `ORCAMENTO` e exigir `rejectQuote` | _pendente_ |
-| SRV-06 | Peça da OS desativada no estoque antes do `PRONTO` | Permitir a baixa de produto inativo | Permitir remover ou trocar a peça em `EM_EXECUCAO` | _pendente_ |
-| CUS-03 | Desativar um cliente que tem OS aberta | Recusar com 409 | `findCustomer` passa a incluir inativos; a checagem de ativo fica só na abertura de OS | _pendente_ |
+| SRV-05 | Sair de `AGUARDANDO_APROVACAO` por `changeStatus` sem resposta do cliente | Encerrar o orçamento automaticamente (`REJEITADO`, com motivo registrado) | Proibir a transição para `ORCAMENTO` e exigir `rejectQuote` | **A** (2026-11-07), vale também para `→ CANCELADO` |
+| SRV-06 | Peça da OS desativada no estoque antes do `PRONTO` | Permitir a baixa de produto inativo | Permitir remover ou trocar a peça em `EM_EXECUCAO` | **A** (2026-11-07), só para peça que já está na OS |
+| CUS-03 | Desativar um cliente que tem OS aberta | Recusar com 409 | `findCustomer` passa a incluir inativos; a checagem de ativo fica só na abertura de OS | **A** (2026-11-07) |
+| SEC-17 | O mesmo CPF/CNPJ pode abrir mais de uma luthieria? | Pode (aceitar o achado) | Não: `unique (document)` | **A: pode**, filiais do mesmo dono (2026-11-07) |
+| PRO-05 | SKU de produto desativado | Reativar o produto (`POST /products/{id}/activate`, 409 indica o id) | Liberar o SKU de inativos | **A** (2026-11-07) |
+| SRV-12 | Quando o token do portal deixa de funcionar | N dias depois de a OS ser entregue ou cancelada (padrão 30) | Logo ao entregar ou cancelar | **A**, e o token sai dos eventos e dos spans (2026-11-07) |
+| SRV-14 | Retenção de clientes desativados | Anonimizar automaticamente após 5 anos inativo (configurável) e incluir notificações na exportação | Só incluir notificações | **A** (2026-11-07) |
 
 ## Implementation Phases
 
 | # | Fase | Status | Achados | Depende de |
 |---|---|---|---|---|
-| 1 | Segurança | pending | SEC-01, NOT-01, SEC-02 | — |
-| 2 | Isolamento de tenant | pending | SH-01, APP-03, NOT-03 | — |
+| 1 | Segurança | done | SEC-01, NOT-01, SEC-02 | — |
+| 2 | Isolamento de tenant | in-progress (mergeada; falta PostgreSQL e pré-checagem em produção) | SH-01, APP-03, NOT-03 | — |
 | 3 | Integridade | in-progress | SRV-01, PRO-01, SH-02, APP-01 | 2 (só o PRO-01) |
-| 4 | Desempenho | in-progress | SRV-02, SRV-03, APP-04 | 3 |
-| 5 | Migration de hardening | pending | SEC-09, SEC-10, SEC-11, CUS-05, PRO-02, PRO-04, SRV-07, SRV-08, SRV-09, NOT-04 | 2, 3 |
-| 6 | MÉDIOS restantes | pending | SEC-03, SEC-04, SEC-05, SEC-06, SEC-07, SEC-08, SEC-12, CUS-01, CUS-02, CUS-03, CUS-04, PRO-03, SRV-04, SRV-05, SRV-06, SRV-10, SRV-11, NOT-02, APP-02 | 1, 3, 5; decisões SRV-05, SRV-06, CUS-03 |
-| 7 | BAIXOS | pending | SH-03, SH-04, SH-05, SEC-13, SEC-14, SEC-15, SEC-16, SEC-17, SEC-18, CUS-06, PRO-05, PRO-06, SRV-12, SRV-13, SRV-14, SRV-15, NOT-05, NOT-06, APP-05, APP-06, APP-07, APP-08, APP-09 | 6 (por prioridade, não por dependência técnica) |
+| 4 | Desempenho | in-progress (mergeada; falta k6) | SRV-02, SRV-03, APP-04 | 3 |
+| 5 | Migration de hardening | in-progress | SEC-09, SEC-10, SEC-11, CUS-05, PRO-02, PRO-04, SRV-07, SRV-08, SRV-09, NOT-04 | 2, 3 |
+| 6 | MÉDIOS restantes | in-progress | SEC-03, SEC-04, SEC-05, SEC-06, SEC-07, SEC-08, SEC-12, CUS-01, CUS-02, CUS-03, CUS-04, PRO-03, SRV-04, SRV-05, SRV-06, SRV-10, SRV-11, NOT-02, APP-02 | 1, 3, 5; decisões SRV-05, SRV-06, CUS-03 |
+| 7 | BAIXOS | in-progress (plano pronto; implementação depois da fase 6) | SH-03, SH-04, SH-05, SEC-13, SEC-14, SEC-15, SEC-16, SEC-17, SEC-18, CUS-06, PRO-05, PRO-06, SRV-12, SRV-13, SRV-14, SRV-15, NOT-05, NOT-06, APP-05, APP-06, APP-07, APP-08, APP-09 | 6 (por prioridade, não por dependência técnica) |
 
 Cobertura: 3 + 3 + 4 + 3 + 10 + 19 + 23 = **65 achados**. O APP-04, que é BAIXO, foi antecipado para a fase 4 porque é a mitigação do N+1.
 
@@ -56,28 +60,28 @@ Cobertura: 3 + 3 + 4 + 3 + 10 + 19 + 23 = **65 achados**. O APP-04, que é BAIXO
 
 ### Fase 1: Segurança
 
-- **Status:** pending
+- **Status:** done (2026-11-07)
 - **Achados:** SEC-01 (ALTO), NOT-01 (ALTO), SEC-02 (ALTO)
 - **Dependências:** nenhuma.
-- **Situação atual:** já implementada, cada achado em uma branch publicada no GitHub: `fix/sec-01-rate-limit-bypass`, `change/not-01-notification-permissions` e `fix/sec-02-login-connection-pool`. Os PRs para `develop` ainda não foram abertos. A fase só fica `done` depois do merge.
+- **Situação atual:** mergeada em `develop`: SEC-02 no PR #14, NOT-01 no PR #15 e SEC-01 no PR #17. O SEC-19, achado na revisão desta fase, não entrou nela e foi para o plano da fase 6.
 - **Critérios de aceite:**
-  - [ ] SEC-01: as variantes codificadas (`/auth/%6cogin`, `/%70ortal/...`) passam pelo mesmo balde da rota canônica e recebem 429 ao esgotá-lo (`RateLimitBypassTest`).
-  - [ ] NOT-01: o ESTOQUISTA só lista o canal `interno`; pedir `email` ou `whatsapp` dá 403, e `markSent` de mensagem externa dá 404. O balcão continua com o link wa.me (`NotificationFlowTest`). A matriz em `docs/api.md` está atualizada.
-  - [ ] SEC-02: dois logins simultâneos com pool de 2 conexões terminam com 200/401 e auditoria gravada; a senha é checada fora de transação (`LoginConnectionPoolTest`).
-  - [ ] Os três PRs foram revisados e mergeados em `develop`, com `verify` verde no CI.
+  - [x] SEC-01: as variantes codificadas (`/auth/%6cogin`, `/%70ortal/...`) passam pelo mesmo balde da rota canônica e recebem 429 ao esgotá-lo (`RateLimitBypassTest`).
+  - [x] NOT-01: o ESTOQUISTA só lista o canal `interno`; pedir `email` ou `whatsapp` dá 403, e `markSent` de mensagem externa dá 404. O balcão continua com o link wa.me (`NotificationFlowTest`). A matriz em `docs/api.md` está atualizada.
+  - [x] SEC-02: dois logins simultâneos com pool de 2 conexões terminam com 200/401 e auditoria gravada; a senha é checada fora de transação (`LoginConnectionPoolTest`).
+  - [x] Os três PRs foram revisados e mergeados em `develop`, com `verify` verde no CI.
 
 ### Fase 2: Isolamento de tenant
 
-- **Status:** pending
+- **Status:** in-progress (código mergeado; faltam os dois últimos critérios)
 - **Achados:** SH-01 (ALTO), APP-03 (MÉDIO), NOT-03 (MÉDIO)
 - **Dependências:** nenhuma.
-- **Situação atual:** já implementada na branch `fix/sh-01-tenant-fail-closed`, publicada no GitHub, com o PR ainda não aberto. Ela cria as migrations `V4_2` a `V4_6`.
+- **Situação atual:** mergeada em `develop` pelo PR #16 (`fix/sh-01-tenant-fail-closed`), com as migrations `V4_2` a `V4_6`. A fase só fica `done` depois do `PostgresMigrationTest` e da pré-checagem de órfãos em produção.
 - **Critérios de aceite:**
-  - [ ] Sem tenant no contexto, as leituras de negócio voltam vazias e gravar um `TenantScopedEntity` lança `IllegalStateException` (`TenantIsolationTest`).
-  - [ ] A visão de todas as luthierias só existe dentro de `TenantContext.callAsPlatform`, com aninhamento e restauração corretos, inclusive depois de exceção (`TenantContextTest`).
-  - [ ] Um JWT com `tid` igual a `ROOT` ou `NO_TENANT` recebe 403.
-  - [ ] Toda tabela com `tenant_id`, exceto `audit_log_tb`, tem FK para `tenant_tb`, e o teste falha para uma tabela nova sem FK.
-  - [ ] O expurgo de notificações remove as antigas de todas as luthierias e preserva as recentes (`RetentionJobFlowTest`). O índice `idx_notification_created` existe.
+  - [x] Sem tenant no contexto, as leituras de negócio voltam vazias e gravar um `TenantScopedEntity` lança `IllegalStateException` (`TenantIsolationTest`).
+  - [x] A visão de todas as luthierias só existe dentro de `TenantContext.callAsPlatform`, com aninhamento e restauração corretos, inclusive depois de exceção (`TenantContextTest`).
+  - [x] Um JWT com `tid` igual a `ROOT` ou `NO_TENANT` recebe 403.
+  - [x] Toda tabela com `tenant_id`, exceto `audit_log_tb`, tem FK para `tenant_tb`, e o teste falha para uma tabela nova sem FK.
+  - [x] O expurgo de notificações remove as antigas de todas as luthierias e preserva as recentes (`RetentionJobFlowTest`). O índice `idx_notification_created` existe.
   - [ ] O **`PostgresMigrationTest` passou com Docker ligado**. Isso ainda não foi feito.
   - [ ] Antes do deploy, a pré-checagem de órfãos (comentário nas migrations `V4_3` a `V4_6`) deu 0 em produção.
 
@@ -99,22 +103,24 @@ Cobertura: 3 + 3 + 4 + 3 + 10 + 19 + 23 = **65 achados**. O APP-04, que é BAIXO
 
 ### Fase 4: Desempenho
 
-- **Status:** in-progress
+- **Status:** in-progress (código mergeado; falta o critério do k6)
 - **Plano:** `.claude/PRPs/plans/completed/fase-4-desempenho.plan.md`
-- **Relatório:** `.claude/PRPs/reports/fase-4-desempenho-report.md` (implementado nas 3 branches `perf/app-04-hibernate-batch`, `perf/srv-02-order-list-totals` e `perf/srv-03-receivable-aggregate`, commitadas localmente e ainda não publicadas; validado também junto com a fase 3; k6 e PostgreSQL não executados. A fase só fica `done` depois do merge)
+- **Relatório:** `.claude/PRPs/reports/fase-4-desempenho-report.md` (mergeado em `develop`: SRV-02 no PR #18, APP-04 no PR #19 e SRV-03 no PR #20. O k6 e o PostgreSQL não foram executados. A fase só fica `done` depois do antes e depois do k6)
 - **Achados:** SRV-02 (ALTO), SRV-03 (ALTO), APP-04 (BAIXO, antecipado)
 - **Dependências:**
   - **Fase 3:** o "a receber" agregado do SRV-03 precisa refletir os invariantes do SRV-01, ou seja, saldo nunca negativo.
   - **APP-04:** não depende de nada e pode entrar primeiro, como mitigação.
 - **Critérios de aceite:**
-  - [ ] SRV-02: a listagem de uma página de 20 OS faz um número constante de consultas, que não cresce com o tamanho da página. Isso é medido com estatísticas do Hibernate ou um contador de SQL no teste.
-  - [ ] SRV-03: o relatório financeiro calcula o "a receber" com agregação em JPQL, mantendo o filtro de tenant (sem SQL nativo). O resultado é igual ao cálculo atual num cenário com várias OS, e o custo não cresce com o histórico de OS `ENTREGUE`.
-  - [ ] APP-04: `default_batch_fetch_size`, `jdbc.batch_size`, `order_inserts` e `order_updates` configurados em `application.yaml`, com a suíte inteira verde.
+  - [x] SRV-02: a listagem de uma página de 20 OS faz um número constante de consultas, que não cresce com o tamanho da página. Isso é medido com estatísticas do Hibernate ou um contador de SQL no teste.
+  - [x] SRV-03: o relatório financeiro calcula o "a receber" com agregação em JPQL, mantendo o filtro de tenant (sem SQL nativo). O resultado é igual ao cálculo atual num cenário com várias OS, e o custo não cresce com o histórico de OS `ENTREGUE`.
+  - [x] APP-04: `default_batch_fetch_size`, `jdbc.batch_size`, `order_inserts` e `order_updates` configurados em `application.yaml`, com a suíte inteira verde.
   - [ ] Os testes de carga do k6 (`load-tests/README.md`) mostram antes e depois para a listagem de OS e o relatório.
 
 ### Fase 5: Migration de hardening
 
-- **Status:** pending
+- **Status:** in-progress
+- **Plano:** `.claude/PRPs/plans/completed/fase-5-hardening.plan.md` (branch única `fix/db-hardening`, migrations `V5_0` a `V5_4`; o merge exige a fase 3 mergeada antes, por causa da `V4_7`)
+- **Relatório:** `.claude/PRPs/reports/fase-5-hardening-report.md` (implementado, ainda sem commit; `verify` verde sozinho e junto com a fase 3. **Falta o `PostgresMigrationTest` com Docker**, obrigatório nesta fase)
 - **Achados:** SEC-09, SEC-10, SEC-11, CUS-05, PRO-02, PRO-04, SRV-07, SRV-08, SRV-09, NOT-04 (todos MÉDIOS)
 - **Dependências:**
   - **Fase 2:** já existe FK `tenant_id`, e as versões vão até `V4_6`.
@@ -129,7 +135,8 @@ Cobertura: 3 + 3 + 4 + 3 + 10 + 19 + 23 = **65 achados**. O APP-04, que é BAIXO
 
 ### Fase 6: MÉDIOS restantes
 
-- **Status:** pending
+- **Status:** in-progress
+- **Plano:** `.claude/PRPs/plans/fase-6-medios.plan.md` (7 branches, migrations `V6_0` a `V6_3`; inclui também SEC-19, SEC-20 e SH-06 de "Achados surgidos". A implementação só começa depois do merge das fases 3 e 5)
 - **Achados (19):**
 
   | Tema | Achados |
@@ -147,7 +154,7 @@ Cobertura: 3 + 3 + 4 + 3 + 10 + 19 + 23 = **65 achados**. O APP-04, que é BAIXO
   - **Fase 1:** o SEC-12 cobre com testes os fluxos corrigidos na fase 1.
   - **Fase 3:** o SRV-04 depende do 409 do SH-02, e o SRV-11 testa SRV-01 e PRO-01.
   - **Fase 5:** o CUS-04 e o PRO-03 mexem nas mesmas buscas que podem ganhar índice.
-  - **Decisões pendentes:** SRV-05, SRV-06 e CUS-03 estão **bloqueados** até a decisão.
+  - **Decisões:** SRV-05, SRV-06 e CUS-03 decididos em 2026-11-07, todos pela opção A (ver "Decisões de negócio pendentes").
 - **Critérios de aceite:**
   - [ ] Cada achado tem teste de regressão que falhava antes da correção.
   - [ ] SEC-12: existem `AuthFlowTest` (refresh, reuso, logout, reset), `UserManagementFlowTest` (isolamento, último ADMIN, revogação) e um teste do rate limit com capacidade real (429).
@@ -160,7 +167,8 @@ Cobertura: 3 + 3 + 4 + 3 + 10 + 19 + 23 = **65 achados**. O APP-04, que é BAIXO
 
 ### Fase 7: BAIXOS
 
-- **Status:** pending
+- **Status:** in-progress
+- **Plano:** `.claude/PRPs/plans/fase-7-baixos.plan.md` (6 branches, migrations `V7_0` a `V7_4`; inclui SH-07 e SEC-21 de "Achados surgidos". A implementação só começa depois do merge da fase 6)
 - **Achados (23):**
 
   | Tema | Achados |
@@ -177,7 +185,7 @@ Cobertura: 3 + 3 + 4 + 3 + 10 + 19 + 23 = **65 achados**. O APP-04, que é BAIXO
 - **Observações:**
   - SH-05 já está parcialmente coberto: o `TenantContextTest` da fase 2 testa o `TenantContext`. Faltam `Masks.email` e o `GlobalExceptionHandler`.
   - SEC-18 inclui corrigir o `CLAUDE.md`, que afirma que o `/h2-console` funciona em dev.
-  - SEC-17 e PRO-05 dependem de regra de negócio. Registrar a decisão neste PRD antes de implementar.
+  - SEC-17, PRO-05, SRV-12 e SRV-14 dependiam de regra de negócio. As decisões foram tomadas em 2026-11-07 (ver "Decisões de negócio pendentes").
 - **Critérios de aceite:**
   - [ ] Cada achado foi corrigido, ou aceito com a justificativa registrada em `docs/auditoria.md`; a auditoria já marca SEC-13 e NOT-06 como aceitáveis.
   - [ ] As mudanças de infraestrutura (APP-06, APP-07, APP-08) foram validadas: `docker compose up` funciona só em localhost, o CI passa com actions fixadas por SHA e o Trivy varre a imagem.
