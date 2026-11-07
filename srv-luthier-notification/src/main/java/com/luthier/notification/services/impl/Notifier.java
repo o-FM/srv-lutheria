@@ -59,6 +59,10 @@ public class Notifier {
         relatedType, relatedId).forCustomer(customerId));
   }
 
+  /**
+   * Alerta interno da oficina. Todos os papéis o leem (inclusive o ESTOQUISTA, NOT-01), então
+   * NUNCA inclua dados de cliente nem o link/token do portal aqui: use email/whatsapp.
+   */
   @Transactional
   public NotificationEntity internal(String subject, String body, String relatedType,
       UUID relatedId) {

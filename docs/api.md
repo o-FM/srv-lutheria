@@ -37,7 +37,7 @@ exportação LGPD. DELETE é exclusão lógica. Erros seguem RFC 9457 (`applicat
 | `GET /portal/orders/{token}`, `POST .../quote/approve\|reject` | Portal do cliente sem senha | público (rate limit) |
 | `GET /reports/dashboard` | Tela "Hoje" | todos |
 | `GET /reports/financial?from=&to=` | Financeiro | ADMIN, LUTHIER |
-| `GET /notifications?channel=&status=`, `POST /notifications/{id}/sent` | Mensagens (e-mail, WhatsApp, alertas) | todos |
+| `GET /notifications?channel=&status=`, `POST /notifications/{id}/sent` | Mensagens (e-mail, WhatsApp, alertas) | e-mail/WhatsApp: ADMIN, LUTHIER, ATENDENTE; ESTOQUISTA só vê alertas `interno` (outro canal → 403) |
 | `GET /privacy/customers/{id}/export` | LGPD: exportação dos dados do titular | ADMIN |
 | `GET /audit-logs` | Trilha de auditoria | ADMIN |
 | `GET /actuator/health`, `/info`, `/prometheus` | Operação (em prod, porta 8081 interna) | público |
