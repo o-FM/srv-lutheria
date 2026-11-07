@@ -52,6 +52,7 @@ Nenhuma revisão encontrou IDOR entre tenants, SQL injection, consulta nativa qu
 - **Sugestão:** falhar fechado. `resolveCurrentTenantIdentifier()` deve lançar `IllegalStateException` quando não houver tenant. Crie também um escopo de plataforma explícito, por exemplo `TenantContext.callAsPlatform(...)` com um `ThreadLocal<Boolean>`, usado só pelo lookup do portal e pelos jobs. Isso transforma qualquer esquecimento em erro visível em teste.
 
 ### [MÉDIO] SH-02: violação de unicidade vira HTTP 500 ✔
+- **Status:** resolvido na branch `fix/sh-02-integrity-409`. `DataIntegrityViolationException` responde 409; SQLState `22xxx` (dado inválido) responde 400. Nenhuma das respostas traz a mensagem do driver. Cadastro de luthieria e de usuário usam `saveAndFlush` antes da auditoria `REQUIRES_NEW`. Teste: `GlobalExceptionHandlerTest`.
 - **Arquivo:** `srv-luthier-shared/src/main/java/com/luthier/shared/errors/GlobalExceptionHandler.java:20-98`
 - **Problema:** não existe handler para `DataIntegrityViolationException`. Os fluxos do tipo "checa se existe e depois insere" quebram quando duas requisições concorrentes passam juntas pela checagem: registro de tenant ou usuário (e-mail, CPF, slug), primeira OS do tenant (SRV-04) e SKU (PRO-05). O índice único dispara no flush e o cliente recebe 500. Além disso, o evento de auditoria já gravado em `REQUIRES_NEW` (`USER_CREATED`, `TENANT_REGISTERED`) fica na trilha como registro "fantasma".
 - **Sugestão:** adicionar um handler que responda 409:

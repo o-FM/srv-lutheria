@@ -53,7 +53,9 @@ public class UserManagementServiceImpl implements UserManagementService {
       throw new ConflictException("CPF already exists");
     }
 
-    var user = userRepository.save(UserEntity.newUser(
+    // saveAndFlush: uma corrida no e-mail/CPF estoura AQUI, antes da auditoria em REQUIRES_NEW,
+    // que de outro modo ficaria gravada para um usuário desfeito (SH-02)
+    var user = userRepository.saveAndFlush(UserEntity.newUser(
         tenantId,
         request.name().strip(),
         email,

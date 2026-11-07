@@ -56,7 +56,9 @@ public class TenantRegistrationServiceImpl implements TenantRegistrationService 
     var tenant = tenantRepository.save(
         TenantEntity.newTenant(name, uniqueSlug(name), Cpf.digits(workshop.document())));
 
-    var user = userRepository.save(UserEntity.newUser(
+    // saveAndFlush: uma corrida no e-mail/CPF estoura AQUI, antes da auditoria em REQUIRES_NEW,
+    // que de outro modo ficaria gravada para um cadastro desfeito (SH-02)
+    var user = userRepository.saveAndFlush(UserEntity.newUser(
         tenant.getId(),
         owner.name().strip(),
         email,

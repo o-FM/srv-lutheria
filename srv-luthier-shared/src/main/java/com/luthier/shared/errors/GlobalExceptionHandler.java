@@ -1,9 +1,14 @@
 package com.luthier.shared.errors;
 
 import jakarta.validation.ConstraintViolationException;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.NestedExceptionUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -19,6 +24,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+  /** SQLState classe 22 (data exception), ex.: 22001 = valor maior que a coluna. */
+  private static final String DATA_EXCEPTION_CLASS = "22";
 
   /**
    * @Valid @RequestBody
@@ -78,6 +88,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
             "Registro alterado por outra pessoa. Recarregue e tente novamente."));
+  }
+
+  /**
+   * Constraint do banco violada (unicidade, FK, CHECK): em geral, duas requisições passaram juntas
+   * pela checagem "já existe?" (SH-02). Dado que não cabe na coluna (SQLState 22xxx) é 400. A
+   * resposta nunca traz a mensagem do driver, que contém nome de constraint e valores.
+   */
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  ResponseEntity<ProblemDetail> handleIntegrity(DataIntegrityViolationException ex) {
+    var sqlState = NestedExceptionUtils.getMostSpecificCause(ex) instanceof SQLException sql
+        ? sql.getSQLState() : null;
+    // Só o SQLState: a mensagem do driver traz valores (e-mail, CPF) que não podem ir para o log
+    log.warn("Violação de integridade no banco (SQLState {})", sqlState);
+    if (sqlState != null && sqlState.startsWith(DATA_EXCEPTION_CLASS)) {
+      return ResponseEntity.badRequest().body(ProblemDetail.forStatusAndDetail(
+          HttpStatus.BAD_REQUEST, "Dado inválido ou maior que o permitido."));
+    }
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(ProblemDetail.forStatusAndDetail(
+        HttpStatus.CONFLICT, "Registro duplicado ou em conflito. Recarregue e tente novamente."));
   }
 
   @ExceptionHandler(ConflictException.class)
