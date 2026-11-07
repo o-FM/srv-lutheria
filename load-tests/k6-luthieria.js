@@ -90,6 +90,7 @@ export default function (data) {
 
   group('balcão: consultas', () => {
     check(get('/reports/dashboard', t.token), { 'dashboard 200': (r) => r.status === 200 });
+    check(get('/reports/financial', t.token), { 'financeiro 200': (r) => r.status === 200 });
     check(get('/customers?search=Cliente', t.token, '/customers?search'), { 'busca 200': (r) => r.status === 200 });
     check(get('/service-orders?status=em_execucao', t.token, '/service-orders?status'), { 'kanban 200': (r) => r.status === 200 });
     check(get('/products?lowStock=true', t.token, '/products?lowStock'), { 'estoque 200': (r) => r.status === 200 });
