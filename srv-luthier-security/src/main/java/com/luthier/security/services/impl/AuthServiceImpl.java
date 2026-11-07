@@ -48,8 +48,14 @@ public class AuthServiceImpl implements AuthService {
     this.refreshTtl = Duration.ofDays(props.tokens().refreshDays());
   }
 
+  /**
+   * Sem {@code @Transactional} de propósito (SEC-02): o Argon2 é lento de propósito, e uma
+   * transação aberta seguraria uma conexão do pool durante todo o hash. A auditoria grava em
+   * {@code REQUIRES_NEW} e pediria uma segunda conexão, então N logins simultâneos com N ≥ tamanho
+   * do pool travariam uns aos outros. Cada passo abre a própria conexão curta: as leituras do
+   * repositório, a auditoria e o {@code save} do refresh token.
+   */
   @Override
-  @Transactional
   public TokenResponse login(LoginRequest request) {
     var email = request.email().strip();
 
@@ -67,10 +73,13 @@ public class AuthServiceImpl implements AuthService {
 
     var user = userRepository.findByEmailIgnoreCase(email)
         .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
+
+    // Audita só depois de emitir a sessão: sem transação envolvendo os dois passos, auditar antes
+    // deixaria um LOGIN_SUCCESS registrado mesmo se a gravação do refresh token falhasse.
+    var tokens = issue(user, UUID.randomUUID());
     events.publishEvent(new AuditEvent(user.getTenantId(), "LOGIN_SUCCESS", "user",
         user.getUuid().toString(), null));
-
-    return issue(user, UUID.randomUUID());
+    return tokens;
   }
 
   /**
