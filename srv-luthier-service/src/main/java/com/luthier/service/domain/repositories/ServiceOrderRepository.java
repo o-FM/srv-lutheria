@@ -2,6 +2,7 @@ package com.luthier.service.domain.repositories;
 
 import com.luthier.service.domain.entities.ServiceOrderEntity;
 import com.luthier.service.domain.enums.OrderStatus;
+import com.luthier.service.domain.records.OrderTotals;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -36,6 +37,17 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrderEntity
       """)
   Page<ServiceOrderEntity> search(@Param("status") OrderStatus status,
       @Param("customerId") UUID customerId, @Param("number") Integer number, Pageable pageable);
+
+  /** Totais de mão de obra e peças das OS informadas, sem carregar as coleções (SRV-02). */
+  @Query("""
+      select new com.luthier.service.domain.records.OrderTotals(o.id,
+          coalesce((select sum(i.laborPrice) from OrderServiceItemEntity i where i.order = o), 0bd),
+          coalesce((select sum(p.unitPrice * p.quantity) from OrderPartEntity p
+                    where p.order = o), 0bd))
+      from ServiceOrderEntity o
+      where o.id in :ids
+      """)
+  List<OrderTotals> totalsOf(@Param("ids") Collection<UUID> ids);
 
   List<ServiceOrderEntity> findAllByCustomerIdOrderByOrderNumberDesc(UUID customerId);
 
