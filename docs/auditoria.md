@@ -47,6 +47,7 @@ Nenhuma revisão encontrou IDOR entre tenants, SQL injection, consulta nativa qu
 
 <a id="sh-01"></a>
 ### [ALTO] SH-01: o isolamento de tenant falha aberto ✔
+- **Status:** resolvido na branch `fix/sh-01-tenant-fail-closed`. A sugestão de lançar exceção no resolver foi trocada por um sentinela `NO_TENANT`, porque o Hibernate resolve o tenant ao abrir qualquer sessão, inclusive no login e no outbox. O `@PrePersist` barra a gravação sem tenant, e o escopo de plataforma passou a ser explícito. Testes: `TenantIsolationTest` e `TenantContextTest`.
 - **Arquivo:** `srv-luthier-shared/src/main/java/com/luthier/shared/tenancy/TenantIdentifierResolver.java:24-26, 34-36`
 - **Problema:** sem tenant no `TenantContext`, o resolver devolve `ROOT`, e `isRoot` faz o Hibernate parar de filtrar todas as entidades `@TenantId`. Hoje os caminhos sem tenant (portal, jobs de retenção) são intencionais e corretos. Mas um listener assíncrono novo que esqueça o `runAs`, ou um endpoint `permitAll` novo, passa a ler e gravar dados de **todas** as luthierias, sem erro nem log. Um INSERT nessa situação grava `tenant_id = 00000000-…`, e nenhuma FK impede isso (ver APP-03). `OrderCounterRepository.lockCurrent` (`select c from OrderCounterEntity c`, sem `where`) também passaria a enxergar o contador de outro tenant.
 - **Sugestão:** falhar fechado. `resolveCurrentTenantIdentifier()` deve lançar `IllegalStateException` quando não houver tenant. Crie também um escopo de plataforma explícito, por exemplo `TenantContext.callAsPlatform(...)` com um `ThreadLocal<Boolean>`, usado só pelo lookup do portal e pelos jobs. Isso transforma qualquer esquecimento em erro visível em teste.
@@ -401,6 +402,7 @@ Nenhuma revisão encontrou IDOR entre tenants, SQL injection, consulta nativa qu
 - **Sugestão:** gravar a `NotificationEntity` como pendente na transação e enviar depois do commit ou por um job de envio. Outra opção é tornar o handler idempotente por `(relatedId, channel, status destino)`.
 
 ### [MÉDIO] NOT-03: o job de retenção faz varredura total e não está comprovado ⚠
+- **Status:** resolvido na branch `fix/sh-01-tenant-fail-closed`. O `RetentionJobFlowTest` confirmou que o `DELETE` sob `ROOT` apagava de todos os tenants. Com o SH-01, o job passou a abrir o escopo de plataforma explicitamente. O índice `idx_notification_created` foi criado na `V4_2`. A exclusão em lotes ficou de fora: o volume ainda é pequeno.
 - **Arquivo:** `srv-luthier-notification/src/main/java/com/luthier/notification/domain/repositories/NotificationRepository.java:19-22`, `srv-luthier-notification/src/main/java/com/luthier/notification/services/impl/NotificationRetentionJob.java:28-34`
 - **Problema:** o delete por `created_at < :cutoff` não tem índice adequado e roda numa única transação, sem lotes. Ainda não foi confirmado que um `DELETE` HQL sob o tenant `ROOT` apaga linhas de todos os tenants. Se o filtro continuar valendo, o job apaga zero linhas e não dá erro. Nenhum teste cobre o job. O mesmo vale para `AuditRetentionJob` (SEC-11).
 - **Sugestão:** `create index idx_notification_created on notification_tb (created_at);`, apagar em lotes e criar um teste de integração que comprove o expurgo com dados de dois tenants.
@@ -440,6 +442,7 @@ Nenhuma revisão encontrou IDOR entre tenants, SQL injection, consulta nativa qu
 - **Sugestão:** alinhar com o DDL oficial do Modulith 2.1 (`text` para `serialized_event`, índices do schema oficial) e rodar `PostgresMigrationTest` com Docker ligado.
 
 ### [MÉDIO] APP-03: nenhuma tabela de negócio tem FK para `tenant_tb`
+- **Status:** resolvido na branch `fix/sh-01-tenant-fail-closed`. Foram criadas FKs nas 12 tabelas de negócio (`V4_3` a `V4_6`). O `TenantIsolationTest` falha se uma tabela nova com `tenant_id` ficar sem FK; a única exceção é `audit_log_tb`.
 - **Arquivo:** migrations de customer, product, service e notification (`V1_2`, `V1_3`, `V1_4`, `V2_0`, `V3_0`)
 - **Problema:** é a defesa que falta contra SH-01, ou seja, contra INSERT com tenant `ROOT` ou tenant inexistente.
 - **Sugestão:** `alter table <tabela> add constraint fk_<tabela>_tenant foreign key (tenant_id) references tenant_tb (id);`. Se a FK for indesejada, para manter os módulos independentes para uma futura extração, use pelo menos `check (tenant_id <> '00000000-0000-0000-0000-000000000000')`.

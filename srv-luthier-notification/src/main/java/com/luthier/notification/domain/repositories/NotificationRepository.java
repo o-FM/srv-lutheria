@@ -16,7 +16,10 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
 
   java.util.List<NotificationEntity> findAllByCustomerId(UUID customerId);
 
-  /** Retenção: roda sem tenant (job de plataforma), apaga de todas as luthierias. */
+  /**
+   * Retenção: apaga de todas as luthierias SÓ dentro de TenantContext.callAsPlatform (ver
+   * NotificationRetentionJob). Sem tenant e fora desse escopo, não apaga nada (SH-01).
+   */
   @org.springframework.data.jpa.repository.Modifying
   @Query("delete from NotificationEntity n where n.createdAt < :cutoff")
   int deleteOlderThan(@Param("cutoff") java.time.Instant cutoff);

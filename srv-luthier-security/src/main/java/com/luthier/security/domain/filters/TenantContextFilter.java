@@ -40,6 +40,11 @@ public class TenantContextFilter extends OncePerRequestFilter {
       forbidden(response);
       return;
     }
+    // ROOT/NO_TENANT são estados internos do resolver; um tid assim nunca vem de um usuário real
+    if (TenantContext.isReserved(tenantId)) {
+      forbidden(response);
+      return;
+    }
 
     TenantContext.set(tenantId);
     // Logs (inclusive JSON/ECS em produção) passam a trazer luthieria e usuário de cada linha
