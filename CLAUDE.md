@@ -61,13 +61,14 @@ Modules talk through Spring application events: `StockConsumptionRequested`, `Se
 - Each workshop is a tenant (`tenant_tb`). Business entities extend `shared.tenancy.TenantScopedEntity`. Its `@TenantId` column makes Hibernate filter **every** query and set `tenant_id` on INSERT. Never set `tenant_id` by hand. The class also provides `created_at`/`updated_at` and `@Version` optimistic locking.
 - The JWT carries `tid`. `TenantContextFilter` puts it into `TenantContext`, and `TenantIdentifierResolver` passes it to Hibernate.
 - **Async listeners have no request or JWT.** Every event must carry `tenantId`, and the listener must wrap its work in `TenantContext.runAs(tenantId, ...)` **before** the transaction opens, because the Hibernate session pins the tenant when it opens. Hence the separate `@Transactional` inner `Consumer` bean in `StockConsumptionListener`.
+- **Tenancy fails closed.** With no tenant in `TenantContext`, `TenantIdentifierResolver` returns the `NO_TENANT` sentinel, not `ROOT`. Business reads come back empty, bulk UPDATE/DELETE touch nothing, and persisting a `TenantScopedEntity` throws `IllegalStateException`. The unfiltered all-tenants view exists only inside `TenantContext.callAsPlatform(...)`. It is read-only and, like `runAs`, must wrap the transaction (see `NotificationRetentionJob` and its inner `Purger`). Every business table also has an FK `tenant_id → tenant_tb`, and `TenantIsolationTest` fails if a new table with `tenant_id` lacks one.
 - `user_tb` and `audit_log_tb` have `tenant_id` but **no** automatic filter (login runs before the tenant is known), so their services must filter explicitly.
 - Routes without a tenant: `/auth/**` and the customer portal (`/portal/orders/{token}`). The portal resolves the tenant from the order token and then runs inside that tenant.
 - A record that belongs to another tenant must return **404**. Uniqueness constraints (CPF, SKU, title…) are per tenant.
 
 ### Database migrations
 
-Flyway with `ddl-auto: validate`: the schema comes only from migrations, and Hibernate only checks that the entities match. Each module ships its migrations inside its own JAR under `src/main/resources/db/migration/<module>/`. All modules share **one** Flyway history, so version numbers are global across modules (current: `V1_0`…`V1_4`, `V2_0`, `V3_0`, `V4_0`, `V4_1`). Choose a version higher than every existing one in every module. Migrations must run on both H2 (`MODE=PostgreSQL`, used in dev and most tests) and PostgreSQL.
+Flyway with `ddl-auto: validate`: the schema comes only from migrations, and Hibernate only checks that the entities match. Each module ships its migrations inside its own JAR under `src/main/resources/db/migration/<module>/`. All modules share **one** Flyway history, so version numbers are global across modules (current: `V1_0`…`V1_4`, `V2_0`, `V3_0`, `V4_0`…`V4_6`). Choose a version higher than every existing one in every module. Migrations must run on both H2 (`MODE=PostgreSQL`, used in dev and most tests) and PostgreSQL.
 
 ### Security and API conventions
 

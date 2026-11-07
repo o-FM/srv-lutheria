@@ -31,8 +31,17 @@ public abstract class TenantScopedEntity {
   @Version
   private long version;
 
+  /**
+   * Sem tenant no contexto não há luthieria dona da linha (SH-01). Isso vale também para o escopo
+   * de plataforma, que é só de leitura. A FK para tenant_tb (APP-03) barraria o INSERT depois, mas
+   * aqui o erro sai antes, e com uma causa legível.
+   */
   @PrePersist
   protected void onCreate() {
+    if (TenantContext.current().isEmpty()) {
+      throw new IllegalStateException("Sem tenant no contexto: dados de negócio só podem ser "
+          + "gravados dentro de uma luthieria (TenantContext.runAs)");
+    }
     createdAt = Instant.now();
     updatedAt = createdAt;
   }

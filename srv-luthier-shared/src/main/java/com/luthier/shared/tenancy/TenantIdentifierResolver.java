@@ -11,18 +11,35 @@ import org.springframework.stereotype.Component;
  * Multi-tenancy por coluna discriminadora (banco e schema compartilhados).
  *
  * Toda entidade com @TenantId (ver TenantScopedEntity) é filtrada automaticamente pelo Hibernate
- * em SELECT/UPDATE/DELETE e recebe o tenant no INSERT. Sem tenant no contexto, devolvemos ROOT,
- * que o Hibernate trata como "sem filtro" (isRoot) — reservado a código de plataforma.
+ * em SELECT/UPDATE/DELETE e recebe o tenant no INSERT.
+ *
+ * Falha fechado (SH-01). Sem tenant no contexto, devolvemos {@link #NO_TENANT}, que não é root e
+ * não existe em tenant_tb:
+ * <ul>
+ *   <li>as leituras de negócio voltam vazias;</li>
+ *   <li>UPDATE/DELETE em massa não afetam nenhuma linha;</li>
+ *   <li>INSERT é barrado pelo TenantScopedEntity e pela FK para tenant_tb (APP-03).</li>
+ * </ul>
+ * {@link #ROOT}, a visão sem filtro, só é devolvido dentro de TenantContext.callAsPlatform.
+ *
+ * Não dá para lançar exceção aqui: o Hibernate resolve o tenant ao abrir QUALQUER sessão. Isso
+ * inclui o login, o bootstrap, a auditoria e o outbox do Modulith, que só tocam tabelas sem
+ * tenant.
  */
 @Component
 public class TenantIdentifierResolver
     implements CurrentTenantIdentifierResolver<UUID>, HibernatePropertiesCustomizer {
 
+  /** Visão de plataforma: o Hibernate não aplica o filtro de tenant. */
   public static final UUID ROOT = new UUID(0L, 0L);
+
+  /** Sem tenant e fora do escopo de plataforma: filtra por um tenant que não existe. */
+  public static final UUID NO_TENANT = new UUID(0L, 1L);
 
   @Override
   public UUID resolveCurrentTenantIdentifier() {
-    return TenantContext.current().orElse(ROOT);
+    return TenantContext.current()
+        .orElseGet(() -> TenantContext.isPlatform() ? ROOT : NO_TENANT);
   }
 
   @Override
