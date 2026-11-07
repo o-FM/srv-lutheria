@@ -45,7 +45,7 @@ A auditoria encontrou falhas de segurança, de isolamento entre luthierias, de i
 | 1 | Segurança | pending | SEC-01, NOT-01, SEC-02 | — |
 | 2 | Isolamento de tenant | pending | SH-01, APP-03, NOT-03 | — |
 | 3 | Integridade | in-progress | SRV-01, PRO-01, SH-02, APP-01 | 2 (só o PRO-01) |
-| 4 | Desempenho | pending | SRV-02, SRV-03, APP-04 | 3 |
+| 4 | Desempenho | in-progress | SRV-02, SRV-03, APP-04 | 3 |
 | 5 | Migration de hardening | pending | SEC-09, SEC-10, SEC-11, CUS-05, PRO-02, PRO-04, SRV-07, SRV-08, SRV-09, NOT-04 | 2, 3 |
 | 6 | MÉDIOS restantes | pending | SEC-03, SEC-04, SEC-05, SEC-06, SEC-07, SEC-08, SEC-12, CUS-01, CUS-02, CUS-03, CUS-04, PRO-03, SRV-04, SRV-05, SRV-06, SRV-10, SRV-11, NOT-02, APP-02 | 1, 3, 5; decisões SRV-05, SRV-06, CUS-03 |
 | 7 | BAIXOS | pending | SH-03, SH-04, SH-05, SEC-13, SEC-14, SEC-15, SEC-16, SEC-17, SEC-18, CUS-06, PRO-05, PRO-06, SRV-12, SRV-13, SRV-14, SRV-15, NOT-05, NOT-06, APP-05, APP-06, APP-07, APP-08, APP-09 | 6 (por prioridade, não por dependência técnica) |
@@ -99,7 +99,9 @@ Cobertura: 3 + 3 + 4 + 3 + 10 + 19 + 23 = **65 achados**. O APP-04, que é BAIXO
 
 ### Fase 4: Desempenho
 
-- **Status:** pending
+- **Status:** in-progress
+- **Plano:** `.claude/PRPs/plans/completed/fase-4-desempenho.plan.md`
+- **Relatório:** `.claude/PRPs/reports/fase-4-desempenho-report.md` (implementado nas 3 branches `perf/app-04-hibernate-batch`, `perf/srv-02-order-list-totals` e `perf/srv-03-receivable-aggregate`, commitadas localmente e ainda não publicadas; validado também junto com a fase 3; k6 e PostgreSQL não executados. A fase só fica `done` depois do merge)
 - **Achados:** SRV-02 (ALTO), SRV-03 (ALTO), APP-04 (BAIXO, antecipado)
 - **Dependências:**
   - **Fase 3:** o "a receber" agregado do SRV-03 precisa refletir os invariantes do SRV-01, ou seja, saldo nunca negativo.
