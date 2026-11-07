@@ -1,0 +1,7 @@
+# Só para os testes: ativa o perfil dev (H2), que deixou de ser o padrão (APP-01).
+# Fica em config/ de propósito: o Spring Boot carrega classpath:/config/application.yaml JUNTO com
+# o classpath:/application.yaml principal. Um application.yaml na raiz de src/test/resources
+# substituiria o principal no classpath de teste.
+spring:
+  profiles:
+    active: dev

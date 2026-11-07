@@ -1,10 +1,10 @@
 # Configuração BASE: padrões seguros, valem para todos os ambientes.
-# Relaxamentos de desenvolvimento ficam em application-dev.yaml (perfil padrão local).
+# Relaxamentos de desenvolvimento ficam em application-dev.yaml. O perfil dev NUNCA é o padrão
+# (APP-01): ative-o explicitamente (--spring.profiles.active=dev). Sem perfil, a aplicação exige
+# os segredos de produção (JWT_SECRET, ADMIN_SENHA) e não sobe sem eles.
 spring:
   application:
     name: srv-luthieria
-  profiles:
-    default: dev
   threads:
     virtual:
       enabled: true

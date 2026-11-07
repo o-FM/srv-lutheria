@@ -19,8 +19,10 @@ Use `./mvnw` (or `mvnw.cmd` on Windows). The integration tests live in `srv-luth
 ./mvnw -pl srv-luthier-app -am test -Dtest=ServiceOrderFlowTest -Dsurefire.failIfNoSpecifiedTests=false
 ./mvnw -pl srv-luthier-app -am test -Dtest='ServiceOrderFlowTest#fullLifecycle' -Dsurefire.failIfNoSpecifiedTests=false
 
-# Run locally (default profile "dev": in-memory H2 in PostgreSQL mode, port 8080, Swagger/api-docs + /h2-console on)
-java -jar srv-luthier-app/target/srv-luthier-app-1.0.0-SNAPSHOT.jar
+# Run locally on the "dev" profile (in-memory H2 in PostgreSQL mode, port 8080, Swagger/api-docs + /h2-console on).
+# dev is NOT a default profile: activate it explicitly (spring-boot:run already does).
+java -jar srv-luthier-app/target/srv-luthier-app-1.0.0-SNAPSHOT.jar --spring.profiles.active=dev
+./mvnw -pl srv-luthier-app spring-boot:run
 # Dev admin: admin@luthieria.local / dev-admin-12345
 
 # Full stack (PostgreSQL, app on the prod profile, Mailpit, Prometheus, Jaeger)
@@ -80,7 +82,7 @@ Flyway with `ddl-auto: validate`: the schema comes only from migrations, and Hib
 ### Configuration profiles
 
 - `application.yaml` holds the secure base defaults (HTTPS required, Swagger off, no error details).
-- `application-dev.yaml` is the default local profile and relaxes them (H2, permissive CORS, dev secrets).
+- `application-dev.yaml` is the local profile and relaxes them (H2, permissive CORS, dev secrets). It is **never** a default (APP-01): with no profile the app requires the production secrets. Tests activate it through `srv-luthier-app/src/test/resources/config/application.yaml`, which Spring Boot loads in addition to the main `application.yaml`. Never add an `application.yaml` at the root of `src/test/resources`, because it would replace the main one.
 - `application-prod.yaml` is used in production. `JWT_SECRET` (≥ 32 bytes) and `ADMIN_SENHA` (≥ 12 characters) are mandatory there, with no defaults. The full list of environment variables is in `README.md`.
 
 ### Tests

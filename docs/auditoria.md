@@ -430,6 +430,7 @@ Nenhuma revisão encontrou IDOR entre tenants, SQL injection, consulta nativa qu
 ## srv-luthier-app, infraestrutura e CI
 
 ### [MÉDIO] APP-01: sem perfil definido, a aplicação sobe em dev com segredos públicos
+- **Status:** resolvido na branch `fix/app-01-no-default-profile`. O `spring.profiles.default: dev` foi removido; sem perfil, a aplicação exige os segredos de produção. Os testes ativam o dev por `src/test/resources/config/application.yaml`, e o `spring-boot:run` ativa o dev pelo plugin. Teste: `ProfileDefaultsTest`.
 - **Arquivo:** `srv-luthier-app/src/main/resources/application.yaml:6-7`, `srv-luthier-app/src/main/resources/application-dev.yaml:41, 43`
 - **Problema:** `spring.profiles.default: dev` ativa o perfil permissivo quando ninguém define um perfil. Um `java -jar` sem `SPRING_PROFILES_ACTIVE`, ou um deploy fora do Dockerfile (que fixa `prod`), sobe com `JWT_SECRET=dev-only-secret-…`, valor que está no repositório. Com ele, qualquer pessoa forja um JWT HS256 de ADMIN para qualquer `tid`, o que dá acesso total a todos os tenants. O perfil dev também desliga `require-https`.
 - **Sugestão:** remover o `default: dev` e fazer a aplicação falhar sem perfil, com o perfil dev ativado explicitamente na IDE ou no `mvn spring-boot:run`. Outra opção é recusar a subida quando o segredo for o de dev e o perfil não for `dev`/`test`.

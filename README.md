@@ -28,7 +28,9 @@ Eventos entre módulos: `StockConsumptionRequested` (OS pronta → baixa de esto
 
 ```bash
 mvn install                                   # build + todos os testes
-java -jar srv-luthier-app/target/srv-luthier-app-1.0.0-SNAPSHOT.jar   # perfil dev: H2, porta 8080
+java -jar srv-luthier-app/target/srv-luthier-app-1.0.0-SNAPSHOT.jar --spring.profiles.active=dev   # H2, porta 8080
+# ou: ./mvnw -pl srv-luthier-app spring-boot:run   (já ativa o perfil dev)
+# Sem perfil, a aplicação NÃO cai em dev: exige JWT_SECRET e ADMIN_SENHA
 
 # Ambiente completo: PostgreSQL, app (perfil prod), Mailpit, Prometheus e Jaeger
 mvn install -DskipTests && docker compose up --build
