@@ -17,6 +17,7 @@ import com.luthier.service.domain.records.OrderRequests.ReceivePayment;
 import com.luthier.service.domain.records.OrderRequests.RejectQuote;
 import com.luthier.service.domain.records.OrderRequests.UpdateOrder;
 import com.luthier.service.domain.records.OrderResponse;
+import com.luthier.service.domain.records.OrderTotals;
 import com.luthier.service.domain.repositories.OrderCounterRepository;
 import com.luthier.service.domain.repositories.ServiceCatalogRepository;
 import com.luthier.service.domain.repositories.ServiceOrderRepository;
@@ -29,10 +30,13 @@ import com.luthier.shared.tenancy.TenantContext;
 import com.luthier.shared.web.PageResponse;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
@@ -86,8 +90,20 @@ public class ServiceOrderServiceImpl implements ServiceOrderService {
   @Transactional(readOnly = true)
   public PageResponse<OrderResponse> search(OrderStatus status, UUID customerId, Integer number,
       Pageable pageable) {
-    return PageResponse.of(orderRepository.search(status, customerId, number, pageable),
-        OrderResponse::summary);
+    var page = orderRepository.search(status, customerId, number, pageable);
+    var totals = totalsOf(page);
+    return PageResponse.of(page, o -> OrderResponse.summary(o,
+        totals.getOrDefault(o.getId(), OrderTotals.empty(o.getId()))));
+  }
+
+  /** Totais da página numa consulta só (SRV-02); página vazia não consulta (evita "in ()"). */
+  private Map<UUID, OrderTotals> totalsOf(Page<ServiceOrderEntity> page) {
+    if (page.isEmpty()) {
+      return Map.of();
+    }
+    var ids = page.getContent().stream().map(ServiceOrderEntity::getId).toList();
+    return orderRepository.totalsOf(ids).stream()
+        .collect(Collectors.toMap(OrderTotals::orderId, Function.identity()));
   }
 
   @Override

@@ -57,13 +57,13 @@ public record OrderResponse(UUID id, int orderNumber, UUID clientId, UUID instru
         o.grandTotal(), o.getPaidAmount(), o.balance(), o.getTrackingToken());
   }
 
-  /** Versão enxuta para listagens. */
-  public static OrderResponse summary(ServiceOrderEntity o) {
+  /** Versão enxuta para listagens: totais vêm do banco (OrderTotals), sem tocar nas coleções. */
+  public static OrderResponse summary(ServiceOrderEntity o, OrderTotals totals) {
     return new OrderResponse(o.getId(), o.getOrderNumber(), o.getCustomerId(),
         o.getInstrumentId(), o.getStatus(), o.getPriority(), o.getReportedIssue(), null, null,
         o.getCreatedAt(), o.getEstimatedDeliveryDate(), o.getCompletedAt(), o.getDeliveredAt(),
-        List.of(), List.of(), null, List.of(), List.of(), o.grandTotal(), o.getPaidAmount(),
-        o.balance(), null);
+        List.of(), List.of(), null, List.of(), List.of(), totals.grandTotal(o.getDiscount()),
+        o.getPaidAmount(), totals.balance(o.getDiscount(), o.getPaidAmount()), null);
   }
 
   static Quote quote(ServiceOrderEntity o) {

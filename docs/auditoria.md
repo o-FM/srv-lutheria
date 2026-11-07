@@ -298,7 +298,7 @@ Nenhuma revisão encontrou IDOR entre tenants, SQL injection, consulta nativa qu
 - **Sugestão:** centralizar as duas regras (desconto ≤ subtotal e valor pago ≤ total) num `assertTotalsConsistent()` chamado em `removeService`, `removePart`, `updateDetails` e `sendQuote`. A alternativa é proibir a remoção de itens quando `paidAmount > 0`. Cobrir os dois cenários com teste.
 
 <a id="srv-02"></a>
-### [ALTO] SRV-02: N+1 na listagem de OS
+### [ALTO] SRV-02: N+1 na listagem de OS ✔
 - **Arquivo:** `srv-luthier-service/src/main/java/com/luthier/service/domain/records/OrderResponse.java:61-67`, `srv-luthier-service/src/main/java/com/luthier/service/services/impl/ServiceOrderServiceImpl.java:85-91`, `srv-luthier-service/src/main/java/com/luthier/service/domain/repositories/ServiceOrderRepository.java:31-38`
 - **Problema:** `summary()` chama `grandTotal()` e `balance()`, que percorrem `services` e `parts`, ambos `@OneToMany` LAZY. Uma página de 20 OS gera cerca de 40 SELECTs extras, e o kanban é a tela mais usada. O projeto não configura `default_batch_fetch_size` (ver APP-04).
 - **Sugestão:** projetar a listagem com os totais calculados no banco (subqueries `sum(...)` por `order_id`). Como mitigação rápida, usar `@BatchSize(size = 50)` nas coleções ou `hibernate.default_batch_fetch_size=50`.
